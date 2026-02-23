@@ -1,26 +1,17 @@
 {
-    "version": 2,
-    "builds": [
-        {
-            "src": "package.json",
-            "use": "@vercel/static-build",
-            "config": {
-                "distDir": "dist"
-            }
-        },
-        {
-            "src": "api/index.js",
-            "use": "@vercel/node"
+    "functions": {
+        "api/index.js": {
+            "runtime": "nodejs18.x"
         }
-    ],
-    "routes": [
+    },
+    "rewrites": [
         {
-            "src": "/socket.io/(.*)",
-            "dest": "api/index.js"
+            "source": "/socket.io/(.*)",
+            "destination": "/api"
         },
         {
-            "src": "/(.*)",
-            "dest": "/index.html"
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
     ]
 }
