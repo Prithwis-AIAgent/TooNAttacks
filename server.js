@@ -1,8 +1,8 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
-const setupSocketHandler = require('./logic/socketHandler');
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import path from 'path';
+import setupSocketHandler from './logic/socketHandler.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -12,6 +12,8 @@ const io = new Server(server, {
         methods: ["GET", "POST"]
     }
 });
+
+const __dirname = path.resolve();
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'dist')));

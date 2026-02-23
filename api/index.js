@@ -1,7 +1,7 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const setupSocketHandler = require('../logic/socketHandler');
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import setupSocketHandler from '../logic/socketHandler.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -14,7 +14,7 @@ const io = new Server(server, {
 
 setupSocketHandler(io);
 
-module.exports = (req, res) => {
+export default (req, res) => {
     if (!res.socket.server.io) {
         res.socket.server.io = io;
         io.attach(res.socket.server);

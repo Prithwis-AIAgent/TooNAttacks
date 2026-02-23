@@ -3,9 +3,9 @@
  * Handles real-time events for the card game.
  */
 
-const GameEngine = require('./gameEngine');
+import GameEngine from './gameEngine.js';
 
-module.exports = (io) => {
+export default (io) => {
     let activeGames = {};
     const CREATOR_ID = "Prithwis";
 

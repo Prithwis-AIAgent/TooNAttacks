@@ -1,4 +1,4 @@
-const GameEngine = require('./logic/gameEngine');
+import GameEngine from './logic/gameEngine.js';
 
 function runTest() {
     console.log("--- Starting TooNAttacks 4-Player Logic Test ---");

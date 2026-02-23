@@ -3,8 +3,8 @@
  * Handles multiplayer battle logic for 2-4 players.
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 class GameEngine {
     constructor(players) {
@@ -166,4 +166,4 @@ class GameEngine {
     }
 }
 
-module.exports = GameEngine;
+export default GameEngine;
