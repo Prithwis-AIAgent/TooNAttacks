@@ -155,14 +155,24 @@ class GameEngine {
         return {
             players: this.players.map(p => ({
                 name: p.name,
+                points: p.points, // Include points here
                 cardCount: p.stack.length,
                 topCard: p.name === requestingPlayerName ? {
-                    ...p.stack[0],
-                    imagePath: this.getCardImagePath(p.stack[0].id)
+                    ...p.stack[0]
                 } : null // Blind play: hide others' cards
             })),
-            turnOf: this.players[this.turnIndex].name
+            turnOf: this.players[this.turnIndex].name,
+            status: this.isGameOver() ? 'finished' : 'started'
         };
+    }
+
+    forfeit(playerName) {
+        const player = this.players.find(p => p.name === playerName);
+        if (player) {
+            player.stack = []; // Empty stack to force game over
+            return true;
+        }
+        return false;
     }
 
     getCardImagePath(cardId) {

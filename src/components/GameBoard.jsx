@@ -9,10 +9,12 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
     const [battleResults, setBattleResults] = useState(null);
     const [stage, setStage] = useState('idle'); // idle, revealed
     const [showLeaderboard, setShowLeaderboard] = useState(false);
+    const [gameOverData, setGameOverData] = useState(null);
 
     const players = gameState.players || [];
     const turnOf = gameState.turnOf;
     const isMyTurn = currentPlayerName === turnOf;
+    const myPlayer = players.find(p => p.name === currentPlayerName);
 
     // Custom layout logic based on player count
     const getLayoutConfig = (playerCount) => {
@@ -20,6 +22,7 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
         const reordered = [...players.slice(myIndex), ...players.slice(0, myIndex)];
 
         const configs = {
+            1: ['bottom'], // Should not happen in game
             2: ['bottom', 'top'],
             3: ['bottom', 'top-left', 'top-right'],
             4: ['bottom', 'left', 'top', 'right']
@@ -47,7 +50,21 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
             }, 5000);
         });
 
-        return () => socket.off('revealWinner');
+        socket.on('gameOver', (data) => {
+            setGameOverData(data);
+        });
+
+        socket.on('updateState', (state) => {
+            if (state.status === 'finished') {
+                // Game engine might report finished before socket event
+            }
+        });
+
+        return () => {
+            socket.off('revealWinner');
+            socket.off('gameOver');
+            socket.off('updateState');
+        };
     }, [socket]);
 
     const handleForfeit = () => {
@@ -59,7 +76,7 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
     // UI Position Helpers
     const getRoleStyles = (role) => {
         const styles = {
-            'bottom': { bottom: '5%', left: '50%', x: '-50%' },
+            'bottom': { bottom: '2%', left: '50%', x: '-50%' },
             'top': { top: '5%', left: '50%', x: '-50%' },
             'left': { left: '8%', top: '50%', y: '-50%' },
             'right': { right: '8%', top: '50%', y: '-50%' },
@@ -71,22 +88,63 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
 
     const getBattleOffset = (role) => {
         const offsets = {
-            'bottom': { x: 0, y: 120 },
-            'top': { x: 0, y: -120 },
-            'left': { x: -160, y: 0 },
-            'right': { x: 160, y: 0 },
-            'top-left': { x: -100, y: -100 },
-            'top-right': { x: 100, y: -100 }
+            'bottom': { x: 0, y: 150 },
+            'top': { x: 0, y: -150 },
+            'left': { x: -200, y: 0 },
+            'right': { x: 200, y: 0 },
+            'top-left': { x: -140, y: -140 },
+            'top-right': { x: 140, y: -140 }
         };
         return offsets[role] || { x: 0, y: 0 };
     };
 
+    // Stats Selection Box Layout
+    const statButtons = [
+        { id: 'strength', label: 'STR' },
+        { id: 'height_ft', label: 'HGT' },
+        { id: 'weight_kg', label: 'WGT' },
+        { id: 'intelligence_iq', label: 'IQ' },
+        { id: 'speed_hp', label: 'SPD' },
+        { id: 'gadgets', label: 'GDG' }
+    ];
+
+    if (gameOverData) {
+        return (
+            <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-3xl flex items-center justify-center p-8">
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="max-w-md w-full flex flex-col items-center gap-8"
+                >
+                    <div className="text-center">
+                        <Trophy size={80} className="text-yellow-400 mx-auto mb-4 animate-bounce" />
+                        <h1 className="text-4xl font-black italic text-white tracking-widest mb-2">GAME OVER</h1>
+                        <p className="text-cyan-400 font-bold uppercase tracking-widest text-sm opacity-60">
+                            {gameOverData.reason || "MATCH COMPLETED"}
+                        </p>
+                    </div>
+
+                    <div className="w-full">
+                        <Leaderboard players={gameOverData.finalScores || players} />
+                    </div>
+
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="w-full py-6 bg-cyan-500 hover:bg-cyan-400 text-black font-black italic text-xl rounded-3xl transition-all shadow-[0_0_30px_rgba(34,211,238,0.3)] hover:scale-105 active:scale-95"
+                    >
+                        RETURN TO LOBBY
+                    </button>
+                </motion.div>
+            </div>
+        );
+    }
+
     return (
-        <div className="relative w-full h-[calc(100vh-80px)] overflow-hidden bg-[radial-gradient(circle_at_center,_#151535_0%,_#050510_100%)]">
+        <div className="relative w-full h-[calc(100vh-80px)] overflow-hidden bg-[radial-gradient(circle_at_center,_#151545_0%,_#050510_100%)]">
 
             {/* Ambient Background Table */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-[70vw] h-[70vw] max-w-[800px] max-h-[800px] rounded-full bg-cyan-500/5 border border-cyan-500/10 shadow-[inner_0_0_100px_rgba(6,182,212,0.1)]" />
+                <div className="w-[80vw] h-[80vw] max-w-[900px] max-h-[900px] rounded-full bg-cyan-500/5 border border-cyan-500/10 shadow-[inner_0_0_150px_rgba(6,182,212,0.15)]" />
             </div>
 
             {/* Toolbar */}
@@ -111,35 +169,68 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
                     >
                         <div className="flex flex-col items-center gap-4">
                             {/* Avatar & Status */}
-                            <div className={isBottom ? 'order-last' : 'order-first'}>
+                            <div className={isBottom ? 'order-last mt-4' : 'order-first'}>
                                 <PlayerAvatar player={p} isTurn={turnOf === p.name} size={isBottom ? 'lg' : 'md'} />
                             </div>
 
-                            {/* Card View */}
-                            <AnimatePresence>
-                                {stage === 'idle' && (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.8, y: isBottom ? 50 : -50 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        exit={{ scale: 0.5, opacity: 0 }}
-                                    >
-                                        <Card
-                                            card={isBottom ? p.topCard : null}
-                                            isFaceUp={isBottom}
-                                            size={isBottom ? 'md' : 'sm'}
-                                            onStatClick={handleStatSelect}
-                                            disabled={!isMyTurn}
-                                            deckId={deckId}
-                                        />
-                                        {/* Opponent Card Stack Label */}
-                                        {!isBottom && (
-                                            <div className="mt-2 px-3 py-1 bg-black/40 rounded-full border border-white/5 text-[9px] font-black text-white/40 uppercase tracking-widest text-center">
-                                                {p.cardCount || 26} Cards Left
-                                            </div>
-                                        )}
-                                    </motion.div>
+                            {/* Card Display Wrapper */}
+                            <div className="relative flex items-center gap-8">
+                                {/* Side Stats (Stat Choosing Boxes as per sketch) */}
+                                {isBottom && isMyTurn && stage === 'idle' && (
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {statButtons.slice(0, 3).map(stat => (
+                                            <button
+                                                key={stat.id}
+                                                onClick={() => handleStatSelect(stat.id)}
+                                                className="w-16 h-12 bg-white/10 hover:bg-cyan-500/40 border border-cyan-500/20 rounded-xl flex items-center justify-center text-[10px] font-black text-cyan-400 transition-all hover:scale-110 active:scale-90"
+                                            >
+                                                {stat.label}
+                                            </button>
+                                        ))}
+                                    </div>
                                 )}
-                            </AnimatePresence>
+
+                                {/* The Card Component */}
+                                <AnimatePresence mode="wait">
+                                    {stage === 'idle' ? (
+                                        <motion.div
+                                            key={`hand-${p.name}`}
+                                            initial={{ opacity: 0, scale: 0.8, y: isBottom ? 50 : -50 }}
+                                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                                            exit={{ scale: 0.5, opacity: 0, y: isBottom ? -200 : 200 }}
+                                        >
+                                            <Card
+                                                card={isBottom ? p.topCard : null}
+                                                isFaceUp={isBottom}
+                                                size={isBottom ? 'md' : 'sm'}
+                                                onStatClick={handleStatSelect}
+                                                disabled={!isMyTurn}
+                                                deckId={deckId}
+                                            />
+                                            {!isBottom && (
+                                                <div className="mt-2 px-3 py-1 bg-black/40 rounded-full border border-white/5 text-[9px] font-black text-white/40 uppercase tracking-widest text-center">
+                                                    {p.cardCount || 26} Cards Left
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    ) : null}
+                                </AnimatePresence>
+
+                                {/* Second Column of Side Stats */}
+                                {isBottom && isMyTurn && stage === 'idle' && (
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {statButtons.slice(3, 6).map(stat => (
+                                            <button
+                                                key={stat.id}
+                                                onClick={() => handleStatSelect(stat.id)}
+                                                className="w-16 h-12 bg-white/10 hover:bg-cyan-500/40 border border-cyan-500/20 rounded-xl flex items-center justify-center text-[10px] font-black text-cyan-400 transition-all hover:scale-110 active:scale-90"
+                                            >
+                                                {stat.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </motion.div>
                 );
@@ -159,21 +250,21 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
                                     <motion.div
                                         key={`reveal-${res.playerName}-${i}`}
                                         initial={{
-                                            x: offset.x * 2,
-                                            y: offset.y * 2,
+                                            x: offset.x,
+                                            y: offset.y,
                                             scale: 0.5,
                                             opacity: 0,
                                             rotate: Math.random() * 20 - 10
                                         }}
                                         animate={{
-                                            x: offset.x,
-                                            y: offset.y,
+                                            x: offset.x * 0.4,
+                                            y: offset.y * 0.4,
                                             scale: isWinner ? 1 : 0.85,
                                             opacity: 1,
                                             rotate: (i - 1) * 10
                                         }}
                                         exit={{ scale: 0, opacity: 0, y: 500 }}
-                                        className="absolute"
+                                        className="absolute p-4 flex flex-col items-center"
                                         style={{ zIndex: isWinner ? 50 : 40 }}
                                     >
                                         <Card
@@ -182,6 +273,9 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
                                             size="md"
                                             deckId={deckId}
                                         />
+                                        <div className="mt-4 px-4 py-2 bg-black/80 backdrop-blur-md rounded-2xl border border-white/10 text-xs font-black text-white italic">
+                                            {res.playerName.toUpperCase()}
+                                        </div>
                                         {isWinner && (
                                             <motion.div
                                                 initial={{ scale: 0 }}

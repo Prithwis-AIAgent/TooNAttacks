@@ -115,9 +115,21 @@ export default (io) => {
                     game.players.splice(playerIndex, 1);
                     console.log(`Removed ${playerName} from room ${rId} due to disconnect.`);
 
-                    // If no one left, we could delete the game object, but let's keep it for now
-                    // Just notify others
-                    io.to(rId).emit('playerJoined', game.players);
+                    // If a game was active, it's now over due to forfeit
+                    if (game.status === 'started' && game.engine) {
+                        game.status = 'finished';
+                        io.to(rId).emit('gameOver', {
+                            reason: `${playerName} disconnected`,
+                            leaderboard: game.engine.getLeaderboard(),
+                            finalScores: game.engine.players.map(p => ({
+                                name: p.name,
+                                points: p.points
+                            }))
+                        });
+                    } else {
+                        // Just notify others of the lobby change
+                        io.to(rId).emit('playerJoined', game.players);
+                    }
                 }
             }
         });
