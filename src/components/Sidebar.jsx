@@ -6,6 +6,7 @@ const Sidebar = ({ activeTab, setActiveTab, isArenaLocked }) => {
     const menuItems = [
         { id: 'decks', icon: LayoutGrid, label: 'Decks', locked: false },
         { id: 'arena', icon: Sword, label: 'Arena', locked: isArenaLocked },
+        { id: 'settings', icon: Settings, label: 'Settings', locked: false },
     ];
 
     return (
@@ -52,9 +53,6 @@ const Sidebar = ({ activeTab, setActiveTab, isArenaLocked }) => {
             <div className="flex flex-col gap-6 text-gray-500">
                 <button className="hover:text-white transition-colors">
                     <Trophy size={20} />
-                </button>
-                <button className="hover:text-white transition-colors">
-                    <Settings size={20} />
                 </button>
             </div>
         </div>

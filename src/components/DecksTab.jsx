@@ -13,28 +13,6 @@ const decks = [
         locked: false,
         color: 'from-blue-500/20 to-cyan-500/20',
         borderColor: 'border-cyan-500/30'
-    },
-    {
-        id: 'wwe',
-        title: 'WWE Slam Attax',
-        description: 'Relive the attitude era. High-strength physical stats for aggressive play.',
-        count: 120,
-        difficulty: 'Medium',
-        rating: 4.9,
-        locked: true,
-        color: 'from-orange-500/20 to-red-600/20',
-        borderColor: 'border-red-500/30'
-    },
-    {
-        id: 'ben10',
-        title: 'Ben 10',
-        description: 'Alien transformation mechanics. Complex intelligence and speed stats.',
-        count: 80,
-        difficulty: 'Hard',
-        rating: 4.7,
-        locked: true,
-        color: 'from-green-500/20 to-emerald-600/20',
-        borderColor: 'border-green-500/30'
     }
 ];
 
@@ -104,10 +82,10 @@ const DecksTab = ({ equippedDeck, onEquip }) => {
                                     onClick={() => !deck.locked && onEquip(deck)}
                                     disabled={deck.locked}
                                     className={`w-full py-4 rounded-2xl font-black tracking-[0.2em] text-xs transition-all ${isEquipped
-                                            ? 'bg-green-500 text-black shadow-[0_0_20px_rgba(34,197,94,0.3)]'
-                                            : deck.locked
-                                                ? 'bg-white/5 text-gray-600 border border-white/5'
-                                                : 'bg-white text-black hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]'
+                                        ? 'bg-green-500 text-black shadow-[0_0_20px_rgba(34,197,94,0.3)]'
+                                        : deck.locked
+                                            ? 'bg-white/5 text-gray-600 border border-white/5'
+                                            : 'bg-white text-black hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]'
                                         }`}
                                 >
                                     {isEquipped ? 'EQUIPPED' : deck.locked ? 'COMING SOON' : 'EQUIP DECK'}

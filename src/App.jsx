@@ -4,6 +4,7 @@ import GameBoard from './components/GameBoard';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DecksTab from './components/DecksTab';
+import SettingsTab from './components/SettingsTab';
 
 const socket = io('http://localhost:3000'); // Dynamic based on env
 
@@ -90,6 +91,8 @@ function App() {
                             equippedDeck={equippedDeck}
                             onEquip={handleEquipDeck}
                         />
+                    ) : activeTab === 'settings' ? (
+                        <SettingsTab />
                     ) : (
                         <>
                             {!gameState ? (
