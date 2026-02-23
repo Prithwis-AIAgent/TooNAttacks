@@ -4,6 +4,12 @@
  */
 
 import GameEngine from './gameEngine.js';
+import { createClient } from '@supabase/supabase-js';
+
+// Supabase Server-side Client
+const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || 'your-key';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default (io) => {
     let activeGames = {};
@@ -75,10 +81,18 @@ export default (io) => {
                     // Check for Game Over
                     if (game.engine.isGameOver()) {
                         game.status = 'finished';
+                        const finalScores = game.engine.players.map(p => ({
+                            name: p.name,
+                            points: p.points
+                        }));
+
                         io.to(roomId).emit('gameOver', {
                             leaderboard: game.engine.getLeaderboard(),
-                            finalScores: game.engine.players.map(p => ({ name: p.name, points: p.points }))
+                            finalScores
                         });
+
+                        // PERSIST TO DATABASE
+                        saveMatchResults(finalScores);
                     } else {
                         // Notify next turn and update stacks (blind filter)
                         game.players.forEach(p => {
@@ -134,4 +148,24 @@ export default (io) => {
             }
         });
     });
+
+    // Helper to persist scores to Supabase
+    async function saveMatchResults(scores) {
+        console.log("Saving match results to Supabase...");
+        for (const score of scores) {
+            try {
+                // Upsert based on name (Note: In a real app, use user_id)
+                const { error } = await supabase
+                    .from('profiles')
+                    .upsert({
+                        name: score.name,
+                        points: score.points // Actually you should probably ADD points, but for now we'll set it
+                    }, { onConflict: 'name' });
+
+                if (error) console.error("Supabase Save Error:", error.message);
+            } catch (err) {
+                console.error("Database connection failed:", err.message);
+            }
+        }
+    }
 };

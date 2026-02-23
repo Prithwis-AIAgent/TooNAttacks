@@ -23,7 +23,7 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
 
         const configs = {
             1: ['bottom'], // Should not happen in game
-            2: ['bottom', 'top'],
+            2: ['left', 'right'],
             3: ['bottom', 'top-left', 'top-right'],
             4: ['bottom', 'left', 'top', 'right']
         };
@@ -78,8 +78,8 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
         const styles = {
             'bottom': { bottom: '2%', left: '50%', x: '-50%' },
             'top': { top: '5%', left: '50%', x: '-50%' },
-            'left': { left: '8%', top: '50%', y: '-50%' },
-            'right': { right: '8%', top: '50%', y: '-50%' },
+            'left': { left: '12%', top: '50%', y: '-50%' },
+            'right': { right: '12%', top: '50%', y: '-50%' },
             'top-left': { top: '8%', left: '15%' },
             'top-right': { top: '8%', right: '15%' }
         };
@@ -90,8 +90,8 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
         const offsets = {
             'bottom': { x: 0, y: 150 },
             'top': { x: 0, y: -150 },
-            'left': { x: -200, y: 0 },
-            'right': { x: 200, y: 0 },
+            'left': { x: -140, y: 0 },
+            'right': { x: 140, y: 0 },
             'top-left': { x: -140, y: -140 },
             'top-right': { x: 140, y: -140 }
         };
@@ -160,29 +160,30 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
 
             {/* Players Area */}
             {playersWithPos.map((p) => {
-                const isBottom = p.role === 'bottom';
+                const isMyPos = p.name === currentPlayerName;
+                const role = p.role;
                 return (
                     <motion.div
                         key={p.name}
-                        style={getRoleStyles(p.role)}
+                        style={getRoleStyles(role)}
                         className="absolute p-4 z-20"
                     >
                         <div className="flex flex-col items-center gap-4">
                             {/* Avatar & Status */}
-                            <div className={isBottom ? 'order-last mt-4' : 'order-first'}>
-                                <PlayerAvatar player={p} isTurn={turnOf === p.name} size={isBottom ? 'lg' : 'md'} />
+                            <div className="mb-2">
+                                <PlayerAvatar player={p} isTurn={turnOf === p.name} size={isMyPos ? 'lg' : 'md'} />
                             </div>
 
                             {/* Card Display Wrapper */}
-                            <div className="relative flex items-center gap-8">
-                                {/* Side Stats (Stat Choosing Boxes as per sketch) */}
-                                {isBottom && isMyTurn && stage === 'idle' && (
-                                    <div className="grid grid-cols-1 gap-3">
+                            <div className="relative flex items-center gap-6">
+                                {/* Side Stats (Left side only for local player) */}
+                                {isMyPos && isMyTurn && stage === 'idle' && (
+                                    <div className="grid grid-cols-1 gap-2">
                                         {statButtons.slice(0, 3).map(stat => (
                                             <button
                                                 key={stat.id}
                                                 onClick={() => handleStatSelect(stat.id)}
-                                                className="w-16 h-12 bg-white/10 hover:bg-cyan-500/40 border border-cyan-500/20 rounded-xl flex items-center justify-center text-[10px] font-black text-cyan-400 transition-all hover:scale-110 active:scale-90"
+                                                className="w-14 h-10 bg-white/10 hover:bg-cyan-500/40 border border-cyan-500/20 rounded-lg flex items-center justify-center text-[9px] font-black text-white transition-all hover:scale-110 active:scale-90"
                                             >
                                                 {stat.label}
                                             </button>
@@ -195,35 +196,34 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
                                     {stage === 'idle' ? (
                                         <motion.div
                                             key={`hand-${p.name}`}
-                                            initial={{ opacity: 0, scale: 0.8, y: isBottom ? 50 : -50 }}
-                                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                                            exit={{ scale: 0.5, opacity: 0, y: isBottom ? -200 : 200 }}
+                                            initial={{ opacity: 0, scale: 0.8 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ scale: 0.5, opacity: 0 }}
                                         >
                                             <Card
-                                                card={isBottom ? p.topCard : null}
-                                                isFaceUp={isBottom}
-                                                size={isBottom ? 'md' : 'sm'}
-                                                onStatClick={handleStatSelect}
+                                                card={isMyPos ? p.topCard : null}
+                                                isFaceUp={isMyPos}
+                                                size={isMyPos ? 'md' : 'sm'}
                                                 disabled={!isMyTurn}
                                                 deckId={deckId}
                                             />
-                                            {!isBottom && (
-                                                <div className="mt-2 px-3 py-1 bg-black/40 rounded-full border border-white/5 text-[9px] font-black text-white/40 uppercase tracking-widest text-center">
-                                                    {p.cardCount || 26} Cards Left
+                                            {!isMyPos && (
+                                                <div className="mt-2 px-3 py-1 bg-black/40 rounded-full border border-white/5 text-[8px] font-black text-white/40 uppercase tracking-widest text-center">
+                                                    {p.cardCount || 26} CRDS
                                                 </div>
                                             )}
                                         </motion.div>
                                     ) : null}
                                 </AnimatePresence>
 
-                                {/* Second Column of Side Stats */}
-                                {isBottom && isMyTurn && stage === 'idle' && (
-                                    <div className="grid grid-cols-1 gap-3">
+                                {/* Side Stats (Right side only for local player) */}
+                                {isMyPos && isMyTurn && stage === 'idle' && (
+                                    <div className="grid grid-cols-1 gap-2">
                                         {statButtons.slice(3, 6).map(stat => (
                                             <button
                                                 key={stat.id}
                                                 onClick={() => handleStatSelect(stat.id)}
-                                                className="w-16 h-12 bg-white/10 hover:bg-cyan-500/40 border border-cyan-500/20 rounded-xl flex items-center justify-center text-[10px] font-black text-cyan-400 transition-all hover:scale-110 active:scale-90"
+                                                className="w-14 h-10 bg-white/10 hover:bg-cyan-500/40 border border-cyan-500/20 rounded-lg flex items-center justify-center text-[9px] font-black text-white transition-all hover:scale-110 active:scale-90"
                                             >
                                                 {stat.label}
                                             </button>

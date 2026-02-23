@@ -5,6 +5,8 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DecksTab from './components/DecksTab';
 import SettingsTab from './components/SettingsTab';
+import Auth from './components/Auth';
+import { supabase } from './lib/supabase';
 
 const socket = io(window.location.origin); // Reliable for both local and deployed environments
 
@@ -20,6 +22,26 @@ function App() {
     const [activeTab, setActiveTab] = useState('decks'); // 'decks', 'arena', 'settings'
     const [equippedDeck, setEquippedDeck] = useState(null);
     const [lobbyMode, setLobbyMode] = useState('choice'); // 'choice', 'create', 'join'
+    const [session, setSession] = useState(null);
+
+    useEffect(() => {
+        // Handle Supabase Auth Session
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+            if (session?.user?.user_metadata?.full_name) {
+                setPlayerName(session.user.user_metadata.full_name);
+            }
+        });
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+            if (session?.user?.user_metadata?.full_name) {
+                setPlayerName(session.user.user_metadata.full_name);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
 
     useEffect(() => {
         socket.on('connect', () => {
@@ -107,6 +129,8 @@ function App() {
         // User is in arena tab but hasn't joined yet
         // This is handled by the lobby view below
     }
+
+    if (!session) return <Auth />;
 
     return (
         <div className="flex h-screen bg-[#050510] text-white overflow-hidden font-['Outfit']">
