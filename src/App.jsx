@@ -129,6 +129,11 @@ function App() {
                                             </div>
                                         ) : (
                                             <div className="pt-4">
+                                                <div className="mb-6 p-4 bg-cyan-500/10 border border-cyan-400/20 rounded-2xl text-center">
+                                                    <p className="text-[10px] text-cyan-400 font-black tracking-widest uppercase mb-1">Invite Code</p>
+                                                    <p className="text-2xl font-mono font-bold text-white tracking-widest">{roomId}</p>
+                                                    <p className="text-[9px] text-gray-500 mt-2 italic">Share this code with your friends</p>
+                                                </div>
                                                 <h3 className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-4 text-center">Players in Room ({players.length}/4)</h3>
                                                 <div className="grid grid-cols-2 gap-2 mb-8">
                                                     {players.map(p => (
