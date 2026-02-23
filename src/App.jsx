@@ -8,7 +8,8 @@ import SettingsTab from './components/SettingsTab';
 import Auth from './components/Auth';
 import { supabase } from './lib/supabase';
 
-const socket = io(window.location.origin); // Reliable for both local and deployed environments
+const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
+const socket = io(backendUrl);
 
 function App() {
     const [playerName, setPlayerName] = useState('');
@@ -27,16 +28,22 @@ function App() {
     useEffect(() => {
         // Handle Supabase Auth Session
         supabase.auth.getSession().then(({ data: { session } }) => {
+            console.log("Supabase Session:", session);
             setSession(session);
-            if (session?.user?.user_metadata?.full_name) {
-                setPlayerName(session.user.user_metadata.full_name);
+            if (session?.user) {
+                const meta = session.user.user_metadata;
+                const name = meta?.full_name || meta?.name || session.user.email.split('@')[0];
+                setPlayerName(name);
             }
         });
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            console.log("Auth State Changed:", _event, session);
             setSession(session);
-            if (session?.user?.user_metadata?.full_name) {
-                setPlayerName(session.user.user_metadata.full_name);
+            if (session?.user) {
+                const meta = session.user.user_metadata;
+                const name = meta?.full_name || meta?.name || session.user.email.split('@')[0];
+                setPlayerName(name);
             }
         });
 
