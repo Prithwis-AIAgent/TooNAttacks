@@ -48,6 +48,10 @@ function App() {
             alert(`CHALLENGE! ${challengerName} has challenged Prithwis!`);
         });
 
+        socket.on('error', (msg) => {
+            alert(`SERVER ERROR: ${msg}`);
+        });
+
         return () => {
             socket.off('playerJoined');
             socket.off('gameStarted');

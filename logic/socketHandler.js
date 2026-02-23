@@ -36,7 +36,10 @@ export default (io) => {
         // Start game specifically for 2-4 players
         socket.on('startGame', (roomId) => {
             const game = activeGames[roomId];
+            console.log(`Starting game for room: ${roomId}. Players:`, game?.players?.length);
+
             if (game && game.players.length >= 2 && game.players.length <= 4) {
+                console.log('Game requirements met. Initializing engine...');
                 const playerNames = game.players.map(p => p.name);
                 game.engine = new GameEngine(playerNames);
                 game.status = 'started';
@@ -51,6 +54,7 @@ export default (io) => {
                     });
                 });
             } else {
+                console.log('Game start rejected. Reason: Invalid player count or room not found.');
                 socket.emit('error', 'Game requires 2-4 players to start.');
             }
         });
