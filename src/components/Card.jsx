@@ -1,47 +1,48 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-const Card = ({ card, isFaceUp = true, animationProps = {}, onStatClick, disabled, deckId = 'doraemon' }) => {
-    const isDoraemon = deckId === 'doraemon';
+const Card = ({ card, isFaceUp = true, onStatClick, disabled, deckId, size = 'md' }) => {
+    const name = card?.name || '???';
+    const stats = card?.stats || {};
+    const id = card?.id;
+    const isDoraemon = deckId === 'doraemon' || true;
+
+    const sizeStyles = {
+        sm: 'w-24 h-36',
+        md: 'w-48 h-72',
+        lg: 'w-56 h-80'
+    };
 
     if (!card && !isFaceUp) {
         // Hidden card (back)
         return (
             <motion.div
-                {...animationProps}
-                className="w-40 h-60 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-900 border-2 border-white/20 shadow-2xl flex items-center justify-center overflow-hidden relative"
+                className={`${sizeStyles[size]} rounded-3xl bg-indigo-950 border-4 border-white/10 shadow-2xl flex items-center justify-center overflow-hidden relative`}
             >
                 {isDoraemon ? (
-                    <img src="/doraemon-back.jpg" alt="Card Back" className="w-full h-full object-cover" />
+                    <img src="/doraemon_cards/Back.jpg" alt="Card Back" className="absolute inset-0 w-full h-full object-cover opacity-80" />
                 ) : (
-                    <>
-                        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent animate-pulse" />
-                        <div className="text-4xl font-bold text-white/10 select-none">TOON</div>
-                    </>
+                    <div className="text-white/10 font-black text-6xl">?</div>
                 )}
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent" />
             </motion.div>
         );
     }
 
-    if (!card) return null;
-
-    const { name, stats, id } = card;
-
     return (
         <motion.div
-            {...animationProps}
-            whileHover={!disabled ? { scale: 1.05, y: -5 } : {}}
-            className={`w-40 h-60 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl overflow-hidden flex flex-col transition-all duration-300 ${disabled ? 'grayscale opacity-60 cursor-not-allowed' : 'cursor-pointer hover:shadow-cyan-500/20'
+            whileHover={!disabled && isFaceUp ? { y: -5, scale: 1.02 } : {}}
+            className={`relative ${sizeStyles[size]} rounded-3xl overflow-hidden border-4 transition-all duration-500 shadow-2xl flex flex-col ${isFaceUp
+                ? 'bg-black/80 border-cyan-500/30'
+                : 'bg-indigo-950 border-white/10'
                 }`}
         >
-            {/* Card Header */}
-            <div className="p-2 bg-gradient-to-r from-white/5 to-white/10 border-b border-white/10 z-10">
-                <h3 className="text-[10px] uppercase tracking-widest font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-cyan-400 truncate">
-                    {name}
-                </h3>
+            {/* Card Content Area */}
+            <div className={`p-4 bg-white/5 border-b border-white/10 flex flex-col ${size === 'sm' ? 'hidden' : ''}`}>
+                <h3 className="text-[10px] font-black italic text-cyan-400 tracking-widest uppercase truncate">{name}</h3>
+                <div className="h-0.5 w-12 bg-cyan-500 rounded-full mt-1" />
             </div>
 
-            {/* Card Content Area */}
             <div className="flex-1 overflow-hidden relative flex items-center justify-center bg-[#151525]">
                 {isDoraemon && (
                     <img
@@ -67,18 +68,24 @@ const Card = ({ card, isFaceUp = true, animationProps = {}, onStatClick, disable
             </div>
 
             {/* Card Stats */}
-            <div className="p-1 px-2 space-y-1 bg-black/40">
-                {Object.entries(stats).map(([stat, value]) => (
-                    <div
-                        key={stat}
-                        onClick={() => !disabled && onStatClick?.(stat)}
-                        className="flex justify-between items-center text-[9px] group hover:bg-white/5 p-1 rounded transition-colors"
+            <div className={`p-2 space-y-1 bg-black/40 ${size === 'sm' ? 'px-1' : 'px-4'}`}>
+                {Object.entries(stats).map(([statName, statValue]) => (
+                    <button
+                        key={statName}
+                        disabled={disabled || !isFaceUp}
+                        onClick={() => onStatClick && onStatClick(statName)}
+                        className={`flex items-center justify-between transition-all w-full px-2 rounded-xl group/stat ${size === 'sm' ? 'py-0.5' : 'py-2'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cyan-500/20 active:scale-95'
+                            }`}
                     >
-                        <span className="text-gray-400 uppercase tracking-tighter group-hover:text-white transition-colors">
-                            {stat.replace('_', ' ')}
+                        {size !== 'sm' && (
+                            <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest group-hover/stat:text-cyan-400 transition-colors">
+                                {statName.replace('_', ' ')}
+                            </span>
+                        )}
+                        <span className={`${size === 'sm' ? 'text-[10px]' : 'text-xs'} font-black text-white group-hover/stat:text-cyan-300`}>
+                            {statValue}
                         </span>
-                        <span className="font-bold text-cyan-400">{value}</span>
-                    </div>
+                    </button>
                 ))}
             </div>
         </motion.div>
