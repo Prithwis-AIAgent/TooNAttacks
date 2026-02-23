@@ -6,7 +6,7 @@ import Header from './components/Header';
 import DecksTab from './components/DecksTab';
 import SettingsTab from './components/SettingsTab';
 
-const socket = io('http://localhost:3000'); // Dynamic based on env
+const socket = io(window.location.origin); // Reliable for both local and deployed environments
 
 function App() {
     const [playerName, setPlayerName] = useState('');
@@ -16,8 +16,9 @@ function App() {
     const [players, setPlayers] = useState([]);
 
     // New navigation and deck states
-    const [activeTab, setActiveTab] = useState('decks'); // 'decks', 'arena'
+    const [activeTab, setActiveTab] = useState('decks'); // 'decks', 'arena', 'settings'
     const [equippedDeck, setEquippedDeck] = useState(null);
+    const [lobbyMode, setLobbyMode] = useState('choice'); // 'choice', 'create', 'join'
 
     useEffect(() => {
         socket.on('playerJoined', (updatedPlayers) => {
@@ -46,10 +47,22 @@ function App() {
         };
     }, []);
 
+    const handleCreateRoom = () => {
+        if (!playerName) return alert("Please enter your name first!");
+        const randomId = Math.random().toString(36).substring(2, 7).toUpperCase();
+        setRoomId(randomId);
+        socket.emit('invitePlayer', { roomId: randomId, playerName });
+        setIsJoined(true);
+    };
+
     const handleJoin = () => {
         if (playerName && roomId) {
             socket.emit('invitePlayer', { roomId, playerName });
             setIsJoined(true);
+        } else if (!playerName) {
+            alert("Please enter your name!");
+        } else if (!roomId) {
+            alert("Please enter a Room ID!");
         }
     };
 
@@ -104,28 +117,72 @@ function App() {
                                         </h1>
 
                                         {!isJoined ? (
-                                            <div className="space-y-4">
-                                                <input
-                                                    type="text"
-                                                    placeholder="YOUR NAME"
-                                                    value={playerName}
-                                                    onChange={(e) => setPlayerName(e.target.value)}
-                                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 transition-colors"
-                                                />
-                                                <input
-                                                    type="text"
-                                                    placeholder="ROOM ID"
-                                                    value={roomId}
-                                                    onChange={(e) => setRoomId(e.target.value)}
-                                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 transition-colors"
-                                                />
-                                                <button
-                                                    onClick={handleJoin}
-                                                    disabled={!equippedDeck}
-                                                    className="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-black py-3 rounded-xl transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-                                                >
-                                                    {equippedDeck ? 'JOIN ARENA' : 'EQUIP DECK FIRST'}
-                                                </button>
+                                            <div className="space-y-6">
+                                                <div className="space-y-2">
+                                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1">Player Profile</p>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="YOUR NICKNAME"
+                                                        value={playerName}
+                                                        onChange={(e) => setPlayerName(e.target.value)}
+                                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all font-bold tracking-tight"
+                                                    />
+                                                </div>
+
+                                                {lobbyMode === 'choice' && (
+                                                    <div className="grid grid-cols-1 gap-4">
+                                                        <button
+                                                            onClick={handleCreateRoom}
+                                                            disabled={!equippedDeck || !playerName}
+                                                            className="w-full h-24 bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-black rounded-2xl transition-all active:scale-95 disabled:opacity-20 flex flex-col items-center justify-center gap-1 shadow-xl shadow-cyan-500/10"
+                                                        >
+                                                            <span className="text-lg">CREATE PRIVATE ROOM</span>
+                                                            <span className="text-[9px] opacity-60">Generate a unique battle code</span>
+                                                        </button>
+
+                                                        <div className="flex items-center gap-4 py-2">
+                                                            <div className="h-px flex-1 bg-white/5" />
+                                                            <span className="text-[10px] font-black text-white/20">OR</span>
+                                                            <div className="h-px flex-1 bg-white/5" />
+                                                        </div>
+
+                                                        <button
+                                                            onClick={() => setLobbyMode('join')}
+                                                            disabled={!equippedDeck || !playerName}
+                                                            className="w-full py-5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-2xl transition-all active:scale-95 disabled:opacity-20 flex flex-col items-center justify-center gap-1"
+                                                        >
+                                                            <span className="text-sm">JOIN WITH CODE</span>
+                                                            <span className="text-[8px] opacity-40 uppercase tracking-widest">Enter a friend's room code</span>
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                {lobbyMode === 'join' && (
+                                                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                                        <div className="space-y-2">
+                                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1">Room Code</p>
+                                                            <input
+                                                                type="text"
+                                                                placeholder="ENTER INVITE CODE (e.g. 10)"
+                                                                value={roomId}
+                                                                onChange={(e) => setRoomId(e.target.value.toUpperCase())}
+                                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-cyan-400 font-mono font-bold tracking-[0.2em] text-center"
+                                                            />
+                                                        </div>
+                                                        <button
+                                                            onClick={handleJoin}
+                                                            className="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-black py-4 rounded-2xl transition-all"
+                                                        >
+                                                            ENTER BATTLE
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setLobbyMode('choice')}
+                                                            className="w-full text-[10px] font-black text-gray-500 hover:text-white uppercase tracking-widest transition-colors py-2"
+                                                        >
+                                                            ← Go Back
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                         ) : (
                                             <div className="pt-4">
