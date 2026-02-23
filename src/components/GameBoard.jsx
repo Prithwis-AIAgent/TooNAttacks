@@ -2,11 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Card from './Card';
 import PlayerAvatar from './PlayerAvatar';
+import Leaderboard from './Leaderboard';
+import { Trophy } from 'lucide-react';
 
 const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
     const [battleResults, setBattleResults] = useState(null);
     const [isRevealing, setIsRevealing] = useState(false);
     const [stage, setStage] = useState('idle'); // idle, flying, revealed, awarding
+    const [showLeaderboard, setShowLeaderboard] = useState(false);
 
     const players = gameState.players || [];
     const turnOf = gameState.turnOf;
@@ -165,6 +168,31 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
                         />
                     </div>
                 )}
+            </div>
+
+            {/* Leaderboard Overlay */}
+            <div className="absolute top-8 right-8 z-50 flex flex-col items-end gap-4">
+                <button
+                    onClick={() => setShowLeaderboard(!showLeaderboard)}
+                    className={`p-3 rounded-2xl border transition-all duration-300 backdrop-blur-md ${showLeaderboard
+                        ? 'bg-cyan-500 text-black border-cyan-400'
+                        : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10'
+                        }`}
+                >
+                    <Trophy size={20} />
+                </button>
+
+                <AnimatePresence>
+                    {showLeaderboard && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                        >
+                            <Leaderboard players={players} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Winner Announcement Overlay */}
