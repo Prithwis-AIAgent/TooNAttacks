@@ -14,6 +14,7 @@ function App() {
     const [gameState, setGameState] = useState(null);
     const [isJoined, setIsJoined] = useState(false);
     const [players, setPlayers] = useState([]);
+    const [isConnected, setIsConnected] = useState(false);
 
     // New navigation and deck states
     const [activeTab, setActiveTab] = useState('decks'); // 'decks', 'arena', 'settings'
@@ -21,6 +22,14 @@ function App() {
     const [lobbyMode, setLobbyMode] = useState('choice'); // 'choice', 'create', 'join'
 
     useEffect(() => {
+        socket.on('connect', () => {
+            setIsConnected(true);
+        });
+
+        socket.on('disconnect', () => {
+            setIsConnected(false);
+        });
+
         socket.on('playerJoined', (updatedPlayers) => {
             setPlayers(updatedPlayers);
         });
@@ -112,9 +121,16 @@ function App() {
                                 /* Lobby UI */
                                 <div className="h-full flex items-center justify-center p-4">
                                     <div className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl">
-                                        <h1 className="text-3xl font-black text-white italic tracking-tighter mb-8 text-center ring-offset-cyan-400">
+                                        <h1 className="text-3xl font-black text-white italic tracking-tighter mb-4 text-center ring-offset-cyan-400">
                                             ARENA <span className="text-cyan-400">LOBBY</span>
                                         </h1>
+                                        <div className="flex justify-center mb-8">
+                                            <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-bold tracking-widest ${isConnected ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-red-500/10 border-red-500/30 text-red-400'
+                                                }`}>
+                                                <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                                                {isConnected ? 'SERVER CONNECTED' : 'SERVER DISCONNECTED'}
+                                            </div>
+                                        </div>
 
                                         {!isJoined ? (
                                             <div className="space-y-6">

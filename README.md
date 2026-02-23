@@ -36,8 +36,14 @@ TooNAttacks is a premium, 4-player multiplayer card game that brings childhood n
 4. **Access the Game**:
    Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-## 🌐 Deployment
-The project is configured for **Vercel** readiness. Note that for persistent Socket.io connections, the backend is best hosted on platforms like **Render** or **Railway**.
+## 🌐 Deployment & Multiplayer
+
+> [!IMPORTANT]
+> **Socket.io on Vercel**: Vercel Serverless Functions are stateless and do not support shared memory between different users. If you and your friends connect to the same URL on Vercel, you might be routed to different server instances and won't see each other in the lobby.
+>
+> **Recommended Hosting**:
+> - **Frontend (UI)**: Vercel or Netlify.
+> - **Backend (Game Logic)**: [Render](https://render.com/), [Railway](https://railway.app/), or [Heroku](https://www.heroku.com/). These platforms support persistent processes required for Socket.io rooms to function correctly for multiple players.
 
 ---
 *Created with ❤️ for the Toon generation.*
