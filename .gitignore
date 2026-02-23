@@ -3,7 +3,4 @@ dist
 .env
 .DS_Store
 *.local
-public/doraemon-front.jpg
-public/doraemon-back.jpg
 test_output.txt
-Doraemon\ Cards/
