@@ -43,6 +43,12 @@ const DecksTab = ({ equippedDeck, onEquip }) => {
                             {/* Background Gradient */}
                             <div className={`absolute inset-0 bg-gradient-to-br ${deck.color} opacity-40 group-hover:opacity-60 transition-opacity`} />
 
+                            {/* NEW: Deck Image Preview */}
+                            <div className="h-48 overflow-hidden relative">
+                                <img src="/doraemon-front.jpg" alt={deck.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#050510] to-transparent opacity-60" />
+                            </div>
+
                             {/* Frosted Glass Overlay */}
                             <div className="relative z-10 p-8 flex flex-col h-full bg-black/40 backdrop-blur-sm">
 

@@ -57,8 +57,19 @@ function App() {
             socket.off('gameStarted');
             socket.off('updateState');
             socket.off('creatorChallenged');
+            socket.off('error');
         };
     }, []);
+
+    useEffect(() => {
+        const handleUnload = () => {
+            if (isJoined && !gameState) {
+                // Handle lobby disconnect specifically if needed
+            }
+        };
+        window.addEventListener('beforeunload', handleUnload);
+        return () => window.removeEventListener('beforeunload', handleUnload);
+    }, [isJoined, gameState]);
 
     const handleCreateRoom = () => {
         if (!playerName) return alert("Please enter your name first!");

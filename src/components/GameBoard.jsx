@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Card from './Card';
 import PlayerAvatar from './PlayerAvatar';
 import Leaderboard from './Leaderboard';
-import { Trophy } from 'lucide-react';
+import { Trophy, RefreshCw, LogOut } from 'lucide-react';
 
 const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
     const [battleResults, setBattleResults] = useState(null);
-    const [isRevealing, setIsRevealing] = useState(false);
     const [stage, setStage] = useState('idle'); // idle, flying, revealed, awarding
     const [showLeaderboard, setShowLeaderboard] = useState(false);
 
@@ -24,195 +23,195 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
     const posMap = ['bottom', 'left', 'top', 'right'];
     const playersWithPos = reorderedPlayers.map((p, i) => ({ ...p, pos: posMap[i] }));
 
-    useEffect(() => {
-        if (!socket) return;
+    const handleStatSelect = (stat) => {
+        if (!isMyTurn || stage !== 'idle') return;
+        socket.emit('selectStat', { roomId: gameState.roomId, chosenStat: stat });
+    };
 
+    useEffect(() => {
         socket.on('revealWinner', (results) => {
             setBattleResults(results);
-            startAnimationSequence(results);
+            setStage('revealed');
+
+            setTimeout(() => {
+                setBattleResults(null);
+                setStage('idle');
+            }, 4000);
         });
 
         return () => socket.off('revealWinner');
     }, [socket]);
 
-    const startAnimationSequence = async (results) => {
-        setIsRevealing(true);
-        setStage('flying');
-
-        // 1. Cards fly to center (handled by motion layout)
-        await new Promise(r => setTimeout(r, 800));
-
-        // 2. Flip to reveal
-        setStage('revealed');
-        await new Promise(r => setTimeout(r, 2000));
-
-        // 3. Move to winner
-        setStage('awarding');
-        await new Promise(r => setTimeout(r, 1000));
-
-        // Reset
-        setIsRevealing(false);
-        setStage('idle');
-        setBattleResults(null);
-    };
-
-    const handleStatSelect = (stat) => {
-        if (isMyTurn && !isRevealing) {
-            socket.emit('selectStat', { roomId: gameState.roomId, chosenStat: stat });
+    const handleForfeit = () => {
+        if (window.confirm("Are you sure you want to forfeit the match?")) {
+            window.location.reload();
         }
     };
 
-    // Animation variants for cards in the center
-    const getCardVariants = (pos, winnerName) => {
-        const positions = {
-            bottom: { x: 0, y: 150 },
-            left: { x: -200, y: 0 },
-            top: { x: 0, y: -150 },
-            right: { x: 200, y: 0 },
-            center: { x: 0, y: 0, scale: 1.2 }
-        };
+    const getCardPos = (pos) => {
+        switch (pos) {
+            case 'bottom': return { bottom: '10%', left: '50%', x: '-50%' };
+            case 'top': return { top: '10%', left: '50%', x: '-50%' };
+            case 'left': return { left: '10%', top: '50%', y: '-50%' };
+            case 'right': return { right: '10%', top: '50%', y: '-50%' };
+            default: return {};
+        }
+    };
 
-        const winnerPos = playersWithPos.find(p => p.name === winnerName)?.pos;
-        const winnerCoords = positions[winnerPos] || { x: 0, y: 0 };
-
-        return {
-            idle: positions[pos],
-            flying: { x: 0, y: 0, transition: { type: 'spring', damping: 20 } },
-            revealed: { rotateY: 0, scale: 1.3 },
-            awarding: { ...winnerCoords, scale: 0, opacity: 0, transition: { duration: 0.6 } }
-        };
+    const getBattlePos = (index) => {
+        const offset = 60;
+        const positions = [
+            { x: 0, y: offset },   // Bottom
+            { x: -offset, y: 0 },  // Left
+            { x: 0, y: -offset },  // Top
+            { x: offset, y: 0 },   // Right
+        ];
+        return positions[index];
     };
 
     return (
-        <div className="relative w-full h-screen bg-[#050510] flex items-center justify-center overflow-hidden font-['Outfit']">
-            {/* Dynamic Background */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(31,38,135,0.15)_0%,_transparent_70%)]" />
-            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+        <div className="relative w-full h-[calc(100vh-80px)] overflow-hidden bg-[radial-gradient(circle_at_center,_#101025_0%,_#050510_100%)]">
 
-            <div className="relative w-full max-w-6xl aspect-video flex items-center justify-center">
-
-                {/* PLAYER AVATARS IN CROSS LAYOUT */}
-                {playersWithPos.map((p) => (
-                    <div
-                        key={p.name}
-                        className={`absolute transition-all duration-500 ${p.pos === 'bottom' ? 'bottom-10' :
-                            p.pos === 'top' ? 'top-10' :
-                                p.pos === 'left' ? 'left-10' : 'right-10'
-                            }`}
-                    >
-                        <PlayerAvatar player={p} isTurn={turnOf === p.name} position={p.pos} />
-                    </div>
-                ))}
-
-                {/* BATTLE ARENA (Center) */}
-                <div className="relative z-10">
-                    <AnimatePresence>
-                        {isRevealing && battleResults && (
-                            <div className="flex gap-4">
-                                {battleResults.results.map((res) => {
-                                    const p = playersWithPos.find(pl => pl.name === res.playerName);
-                                    if (!p) return null;
-
-                                    return (
-                                        <motion.div
-                                            key={res.playerName}
-                                            variants={getCardVariants(p.pos, battleResults.winnerName)}
-                                            initial="flying"
-                                            animate={stage}
-                                            className="perspective-1000"
-                                        >
-                                            <Card
-                                                card={{ name: res.cardName, stats: { [battleResults.stat]: res.value } }}
-                                                isFaceUp={stage !== 'flying'}
-                                                deckId={deckId}
-                                            />
-                                        </motion.div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Prompt for Turn Player */}
-                    {!isRevealing && isMyTurn && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="absolute -bottom-40 left-1/2 -translate-x-1/2 bg-cyan-500/20 backdrop-blur-md border border-cyan-400/50 px-6 py-2 rounded-full"
-                        >
-                            <p className="text-cyan-400 text-sm font-bold tracking-widest uppercase animate-pulse">
-                                Your Turn - Select a Stat
-                            </p>
-                        </motion.div>
-                    )}
-                </div>
-
-                {/* DECK VISUALS (Static cards at each player) */}
-                {!isRevealing && playersWithPos.map(p => (
-                    p.pos !== 'bottom' && (
-                        <div key={`deck-${p.name}`} className={`absolute ${p.pos === 'top' ? 'top-32' : p.pos === 'left' ? 'left-32' : 'right-32'
-                            }`}>
-                            <div className="w-24 h-36 rounded-lg bg-indigo-900/40 border border-white/10 shadow-lg" />
-                        </div>
-                    )
-                ))}
-
-                {/* SELF CARD (Always visible at bottom) */}
-                {!isRevealing && (
-                    <div className="absolute bottom-32">
-                        <Card
-                            card={playersWithPos[0].topCard}
-                            onStatClick={handleStatSelect}
-                            disabled={!isMyTurn}
-                            deckId={deckId}
-                        />
-                    </div>
-                )}
+            {/* Table Surface */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+                <div className="w-[600px] h-[600px] rounded-full border border-cyan-500/20 shadow-[0_0_100px_rgba(34,211,238,0.1)]" />
             </div>
 
-            {/* Leaderboard Overlay */}
-            <div className="absolute top-8 right-8 z-50 flex flex-col items-end gap-4">
+            {/* Utility Buttons */}
+            <div className="absolute top-6 left-6 z-50 flex gap-3">
+                <button
+                    onClick={() => window.location.reload()}
+                    className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all group"
+                    title="Reload"
+                >
+                    <RefreshCw size={18} className="group-active:rotate-180 transition-transform duration-500" />
+                </button>
+                <button
+                    onClick={handleForfeit}
+                    className="p-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-red-400 transition-all flex items-center gap-2 group"
+                    title="Forfeit"
+                >
+                    <LogOut size={18} />
+                    <span className="text-[10px] font-black uppercase tracking-widest hidden group-hover:block">Forfeit</span>
+                </button>
+            </div>
+
+            {/* Players & Their Cards */}
+            {playersWithPos.map((p, i) => (
+                <div
+                    key={p.name}
+                    className="absolute transition-all duration-700 ease-out"
+                    style={getCardPos(p.pos)}
+                >
+                    <div className="flex flex-col items-center gap-4">
+                        <div className={`relative ${p.pos === 'bottom' ? 'order-last' : ''}`}>
+                            <PlayerAvatar
+                                player={p}
+                                isTurn={turnOf === p.name}
+                                size={p.pos === 'bottom' ? 'lg' : 'md'}
+                            />
+                        </div>
+
+                        <AnimatePresence>
+                            {stage === 'idle' && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{
+                                        x: getBattlePos(i).x * 2,
+                                        y: getBattlePos(i).y * 2,
+                                        opacity: 0,
+                                        scale: 0.5
+                                    }}
+                                    transition={{ type: "spring", damping: 20 }}
+                                >
+                                    <Card
+                                        card={p.pos === 'bottom' ? p.topCard : null}
+                                        isFaceUp={p.pos === 'bottom'}
+                                        onStatClick={handleStatSelect}
+                                        disabled={!isMyTurn}
+                                        deckId={deckId}
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </div>
+            ))}
+
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <AnimatePresence>
+                    {stage === 'revealed' && battleResults && (
+                        <div className="relative">
+                            {battleResults.results.map((res, i) => {
+                                const posIndex = reorderedPlayers.findIndex(p => p.name === res.playerName);
+                                const battlePos = getBattlePos(posIndex);
+                                return (
+                                    <motion.div
+                                        key={`battle-${res.playerName}`}
+                                        initial={{
+                                            x: battlePos.x * 5,
+                                            y: battlePos.y * 5,
+                                            opacity: 0,
+                                            scale: 0.5
+                                        }}
+                                        animate={{
+                                            x: battlePos.x,
+                                            y: battlePos.y,
+                                            opacity: 1,
+                                            scale: 0.8
+                                        }}
+                                        exit={{ opacity: 0, scale: 0 }}
+                                        className="absolute"
+                                    >
+                                        <Card
+                                            card={{
+                                                name: res.cardName,
+                                                stats: { [battleResults.stat]: res.value },
+                                                id: players.find(p => p.name === res.playerName)?.topCard?.id
+                                            }}
+                                            isFaceUp={true}
+                                            deckId={deckId}
+                                        />
+                                    </motion.div>
+                                );
+                            })}
+
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.5, y: 140 }}
+                                animate={{ opacity: 1, scale: 1, y: 160 }}
+                                className="absolute left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xl border border-cyan-500/30 px-8 py-3 rounded-2xl shadow-2xl z-50 text-center"
+                            >
+                                <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-1">Winner</p>
+                                <h2 className="text-xl font-black italic text-white uppercase">{battleResults.winnerName}</h2>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            <div className="absolute top-6 right-6 z-50 flex flex-col items-end gap-3">
                 <button
                     onClick={() => setShowLeaderboard(!showLeaderboard)}
-                    className={`p-3 rounded-2xl border transition-all duration-300 backdrop-blur-md ${showLeaderboard
-                        ? 'bg-cyan-500 text-black border-cyan-400'
-                        : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10'
+                    className={`p-3 rounded-xl border transition-all duration-300 backdrop-blur-md ${showLeaderboard
+                            ? 'bg-cyan-500 text-black border-cyan-400'
+                            : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10'
                         }`}
                 >
-                    <Trophy size={20} />
+                    <Trophy size={18} />
                 </button>
-
                 <AnimatePresence>
                     {showLeaderboard && (
                         <motion.div
-                            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                            initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                            exit={{ opacity: 0, x: 20, scale: 0.95 }}
                         >
                             <Leaderboard players={players} />
                         </motion.div>
                     )}
                 </AnimatePresence>
             </div>
-
-            {/* Winner Announcement Overlay */}
-            <AnimatePresence>
-                {stage === 'revealed' && battleResults && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 1.5 }}
-                        className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none"
-                    >
-                        <div className="bg-black/60 backdrop-blur-xl px-20 py-10 rounded-3xl border-2 border-cyan-400/30 shadow-[0_0_100px_rgba(34,211,238,0.2)] text-center">
-                            <h2 className="text-gray-400 uppercase tracking-[0.5em] text-sm mb-2">Round Winner</h2>
-                            <h1 className="text-6xl font-black text-white italic tracking-tighter">
-                                {battleResults.winnerName.toUpperCase()}
-                            </h1>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
         </div>
     );
 };
