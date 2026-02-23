@@ -1,0 +1,106 @@
+:root {
+  --card-bg: rgba(255, 255, 255, 0.1);
+  --card-border: rgba(255, 255, 255, 0.2);
+  --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  --accent-color: #00d2ff;
+  --secondary-color: #3a7bd5;
+  --text-color: #ffffff;
+}
+
+.toona-card {
+  width: 280px;
+  height: 420px;
+  perspective: 1000px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  margin: 15px;
+}
+
+.toona-card:hover:not(.disabled) {
+  transform: translateY(-10px) scale(1.02);
+}
+
+.toona-card.disabled {
+  filter: grayscale(0.8);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-color);
+  font-family: 'Outfit', sans-serif;
+}
+
+.card-header h3 {
+  margin: 0 0 15px 0;
+  text-align: center;
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+  background: linear-gradient(to right, #ffffff, var(--accent-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+}
+
+.card-image-container {
+  width: 100%;
+  height: 160px;
+  background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+}
+
+.image-placeholder span {
+  font-size: 5rem;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.card-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.stat-row:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(5px);
+}
+
+.stat-label {
+  text-transform: capitalize;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.stat-value {
+  font-weight: bold;
+  color: var(--accent-color);
+}

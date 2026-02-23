@@ -1,0 +1,92 @@
+.leaderboard-container {
+    width: 320px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    padding: 25px;
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+}
+
+.leaderboard-header h2 {
+    text-align: center;
+    margin: 0 0 20px 0;
+    font-size: 1.4rem;
+    letter-spacing: 3px;
+    color: #00d2ff;
+    border-bottom: 1px solid rgba(0, 210, 255, 0.3);
+    padding-bottom: 10px;
+}
+
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.leaderboard-item:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: scale(1.03) translateX(5px);
+}
+
+.rank-badge {
+    width: 35px;
+    height: 35px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-right: 15px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.player-name {
+    flex-grow: 1;
+    font-size: 1.1rem;
+    text-transform: capitalize;
+}
+
+.player-points {
+    font-weight: bold;
+    color: #00d2ff;
+    font-size: 1rem;
+}
+
+/* Rank-specific styling */
+.rank-1 .rank-badge {
+    background: linear-gradient(135deg, #ffd700, #b8860b);
+    color: #000;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+.rank-2 .rank-badge {
+    background: linear-gradient(135deg, #c0c0c0, #808080);
+    color: #000;
+}
+
+.rank-3 .rank-badge {
+    background: linear-gradient(135deg, #cd7f32, #8b4513);
+    color: #000;
+}
+
+.rank-1 {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
