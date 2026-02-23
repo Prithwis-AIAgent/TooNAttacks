@@ -177,11 +177,7 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
                                         style={{ zIndex: isWinner ? 50 : 40 }}
                                     >
                                         <Card
-                                            card={{
-                                                name: res.cardName,
-                                                stats: { [battleResults.stat]: res.value },
-                                                id: players.find(p => p.name === res.playerName)?.topCard?.id
-                                            }}
+                                            card={res.card}
                                             isFaceUp={true}
                                             size="md"
                                             deckId={deckId}

@@ -124,7 +124,7 @@ class GameEngine {
             stat: chosenStat,
             results: roundCards.map(rc => ({
                 playerName: rc.playerName,
-                cardName: rc.card.name,
+                card: rc.card, // Send full card object for complete UI
                 value: rc.card.stats[chosenStat]
             })),
             winnerName: tie ? "Tie" : this.players[roundWinnerIndex].name,
@@ -166,7 +166,7 @@ class GameEngine {
     }
 
     getCardImagePath(cardId) {
-        return `/Doraemon Cards/${cardId}.jpg`;
+        return `/doraemon_cards/${cardId}.jpg`;
     }
 }
 
