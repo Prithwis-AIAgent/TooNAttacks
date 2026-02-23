@@ -18,6 +18,11 @@ const __dirname = path.resolve();
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, 'dist')));
 
+// Catch-all route for React SPA
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
 // Initialize game socket logic
 setupSocketHandler(io);
 
