@@ -7,9 +7,10 @@ import { Trophy, RefreshCw, LogOut } from 'lucide-react';
 
 const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
     const [battleResults, setBattleResults] = useState(null);
-    const [stage, setStage] = useState('idle'); // idle, revealed
+    const [stage, setStage] = useState('idle'); // idle, pending, revealed
     const [showLeaderboard, setShowLeaderboard] = useState(false);
     const [gameOverData, setGameOverData] = useState(null);
+    const [pendingShow, setPendingShow] = useState(null); // { playerName, stat, value, timeLeft }
 
     const players = gameState.players || [];
     const turnOf = gameState.turnOf;
@@ -40,14 +41,20 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
     };
 
     useEffect(() => {
+        socket.on('statChosen', (data) => {
+            setPendingShow({ ...data, timeLeft: 5 });
+            setStage('pending');
+        });
+
         socket.on('revealWinner', (results) => {
+            setPendingShow(null);
             setBattleResults(results);
             setStage('revealed');
 
             setTimeout(() => {
                 setBattleResults(null);
                 setStage('idle');
-            }, 5000);
+            }, 6000);
         });
 
         socket.on('gameOver', (data) => {
@@ -107,6 +114,20 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
         { id: 'speed_hp', label: 'SPD' },
         { id: 'gadgets', label: 'GDG' }
     ];
+
+    useEffect(() => {
+        let timer;
+        if (pendingShow && pendingShow.timeLeft > 0) {
+            timer = setInterval(() => {
+                setPendingShow(prev => prev ? { ...prev, timeLeft: prev.timeLeft - 1 } : null);
+            }, 1000);
+        }
+        return () => clearInterval(timer);
+    }, [pendingShow]);
+
+    const handleShowCard = () => {
+        socket.emit('showCard', gameState.roomId);
+    };
 
     if (gameOverData) {
         return (
@@ -193,7 +214,7 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
 
                                 {/* The Card Component */}
                                 <AnimatePresence mode="wait">
-                                    {stage === 'idle' ? (
+                                    {(stage === 'idle' || (stage === 'pending' && !isMyPos)) ? (
                                         <motion.div
                                             key={`hand-${p.name}`}
                                             initial={{ opacity: 0, scale: 0.8 }}
@@ -201,8 +222,8 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
                                             exit={{ scale: 0.5, opacity: 0 }}
                                         >
                                             <Card
-                                                card={isMyPos ? p.topCard : null}
-                                                isFaceUp={isMyPos}
+                                                card={isMyPos && stage === 'idle' ? p.topCard : null}
+                                                isFaceUp={isMyPos && stage === 'idle'}
                                                 size={isMyPos ? 'md' : 'sm'}
                                                 disabled={!isMyTurn}
                                                 deckId={deckId}
@@ -215,6 +236,24 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
                                         </motion.div>
                                     ) : null}
                                 </AnimatePresence>
+
+                                {/* SHOW Button Overlay for Opponents */}
+                                {stage === 'pending' && !isMyTurn && !isMyPos && (
+                                    <motion.div
+                                        initial={{ scale: 0.5, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-[#050510]/80 backdrop-blur-sm rounded-[32px] border border-cyan-500/20 shadow-[0_0_50px_rgba(6,182,212,0.1)]"
+                                    >
+                                        <button
+                                            onClick={handleShowCard}
+                                            className="group relative w-24 h-24 bg-cyan-500 hover:bg-cyan-400 text-black rounded-full flex flex-col items-center justify-center gap-1 transition-all hover:scale-110 active:scale-95 shadow-xl shadow-cyan-500/20 border-4 border-black"
+                                        >
+                                            <span className="text-[10px] font-black italic tracking-tighter">SHOW</span>
+                                            <span className="text-sm font-black">{pendingShow?.timeLeft}s</span>
+                                            <div className="absolute inset-0 rounded-full border-2 border-black/10 animate-ping opacity-20 pointer-events-none" />
+                                        </button>
+                                    </motion.div>
+                                )}
 
                                 {/* Side Stats (Right side only for local player) */}
                                 {isMyPos && isMyTurn && stage === 'idle' && (
@@ -235,6 +274,27 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
                     </motion.div>
                 );
             })}
+
+            {/* Selection Notification Banner */}
+            <AnimatePresence>
+                {stage === 'pending' && pendingShow && (
+                    <motion.div
+                        initial={{ y: -100, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -100, opacity: 0 }}
+                        className="absolute top-10 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2"
+                    >
+                        <div className="bg-white text-black px-10 py-4 rounded-3xl font-black italic shadow-2xl skew-x-[-10deg] border-4 border-cyan-500 ring-4 ring-black/50">
+                            <span className="text-blue-600">{pendingShow.playerName.toUpperCase()}</span>
+                            <span className="mx-3 opacity-40">CHOSE</span>
+                            <span className="text-red-500">{pendingShow.stat.toUpperCase()} : {pendingShow.value}</span>
+                        </div>
+                        <p className="text-[10px] text-cyan-400 font-bold uppercase tracking-[0.3em] animate-pulse">
+                            Waiting for opponent reveal...
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Central Battle Arena */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">

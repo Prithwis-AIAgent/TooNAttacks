@@ -75,36 +75,66 @@ export default (io) => {
                 if (currentPlayer && currentPlayer.name === turnPlayerName) {
                     const roundResult = game.engine.compareStats(chosenStat);
 
-                    // Reveal winner and update all players
-                    io.to(roomId).emit('revealWinner', roundResult);
+                    // Store pending result for this room
+                    game.pendingReveal = roundResult;
 
-                    // Check for Game Over
-                    if (game.engine.isGameOver()) {
-                        game.status = 'finished';
-                        const finalScores = game.engine.players.map(p => ({
-                            name: p.name,
-                            points: p.points
-                        }));
+                    // Notify all players that a stat was chosen
+                    io.to(roomId).emit('statChosen', {
+                        playerName: turnPlayerName,
+                        stat: chosenStat,
+                        value: roundResult.results.find(r => r.playerName === turnPlayerName).statValue
+                    });
 
-                        io.to(roomId).emit('gameOver', {
-                            leaderboard: game.engine.getLeaderboard(),
-                            finalScores
-                        });
+                    // Set a 5s auto-reveal timer
+                    if (game.revealTimer) clearTimeout(game.revealTimer);
+                    game.revealTimer = setTimeout(() => {
+                        processReveal(roomId);
+                    }, 5000);
 
-                        // PERSIST TO DATABASE
-                        saveMatchResults(finalScores);
-                    } else {
-                        // Notify next turn and update stacks (blind filter)
-                        game.players.forEach(p => {
-                            const updatedState = game.engine.getGameState(p.name);
-                            io.to(p.id).emit('updateState', updatedState);
-                        });
-                    }
                 } else {
                     socket.emit('error', 'It is not your turn to select a stat.');
                 }
             }
         });
+
+        // Opponent "SHOW" button trigger
+        socket.on('showCard', (roomId) => {
+            processReveal(roomId);
+        });
+
+        function processReveal(roomId) {
+            const game = activeGames[roomId];
+            if (!game || !game.pendingReveal) return;
+
+            if (game.revealTimer) clearTimeout(game.revealTimer);
+            const roundResult = game.pendingReveal;
+            game.pendingReveal = null;
+
+            // Reveal winner and update all players
+            io.to(roomId).emit('revealWinner', roundResult);
+
+            // Check for Game Over
+            if (game.engine.isGameOver()) {
+                game.status = 'finished';
+                const finalScores = game.engine.players.map(p => ({
+                    name: p.name,
+                    points: p.points
+                }));
+
+                io.to(roomId).emit('gameOver', {
+                    leaderboard: game.engine.getLeaderboard(),
+                    finalScores
+                });
+
+                saveMatchResults(finalScores);
+            } else {
+                // Notify next turn and update stacks (blind filter)
+                game.players.forEach(p => {
+                    const updatedState = game.engine.getGameState(p.name);
+                    io.to(p.id).emit('updateState', updatedState);
+                });
+            }
+        }
 
         // Creator Challenge logic
         socket.on('challengeCreator', ({ roomId, challengerName }) => {
