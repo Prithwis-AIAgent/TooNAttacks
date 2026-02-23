@@ -105,7 +105,21 @@ export default (io) => {
 
         socket.on('disconnect', () => {
             console.log('User disconnected:', socket.id);
-            // Optional: Clean up activeGames if a player disconnects
+            // Clean up: find which room this player was in
+            for (const rId in activeGames) {
+                const game = activeGames[rId];
+                const playerIndex = game.players.findIndex(p => p.id === socket.id);
+
+                if (playerIndex !== -1) {
+                    const playerName = game.players[playerIndex].name;
+                    game.players.splice(playerIndex, 1);
+                    console.log(`Removed ${playerName} from room ${rId} due to disconnect.`);
+
+                    // If no one left, we could delete the game object, but let's keep it for now
+                    // Just notify others
+                    io.to(rId).emit('playerJoined', game.players);
+                }
+            }
         });
     });
 };

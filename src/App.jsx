@@ -227,11 +227,14 @@ function App() {
                                                 </div>
                                                 <div className="flex flex-col gap-2">
                                                     <button
-                                                        onClick={handleStart}
-                                                        disabled={players.length < 2}
-                                                        className="w-full bg-white text-black font-black py-3 rounded-xl text-sm disabled:opacity-30"
+                                                        onClick={() => {
+                                                            console.log("Emitting startGame for room:", roomId);
+                                                            handleStart();
+                                                        }}
+                                                        disabled={players.length < 2 || !isConnected}
+                                                        className="w-full bg-white text-black font-black py-4 rounded-2xl text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-cyan-50 transition-all active:scale-95 shadow-xl shadow-white/5"
                                                     >
-                                                        START BATTLE
+                                                        {players.length < 2 ? `WAITING FOR PLAYERS (${players.length}/2)` : 'START BATTLE'}
                                                     </button>
                                                     <button
                                                         onClick={handleChallenge}
