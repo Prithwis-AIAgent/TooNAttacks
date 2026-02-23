@@ -166,7 +166,7 @@ class GameEngine {
     }
 
     getCardImagePath(cardId) {
-        return `./Doraemon%20Cards/${cardId}.jpg`; // Encode space for URL
+        return `/Doraemon Cards/${cardId}.jpg`;
     }
 }
 
