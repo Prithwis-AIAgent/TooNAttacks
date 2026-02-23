@@ -45,12 +45,16 @@ const Card = ({ card, isFaceUp = true, animationProps = {}, onStatClick, disable
             <div className="flex-1 overflow-hidden relative flex items-center justify-center bg-[#151525]">
                 {isDoraemon && (
                     <img
-                        src={`/Doraemon Cards/${id}.jpg`}
+                        src={`/doraemon_cards/${id}.jpg`}
                         alt={name}
                         className="absolute inset-0 w-full h-full object-cover"
                         onError={(e) => {
-                            e.target.src = "/doraemon-front.jpg";
-                            e.target.className = "absolute inset-0 w-full h-full object-cover opacity-50";
+                            if (!e.target.src.endsWith('.png')) {
+                                e.target.src = `/doraemon_cards/${id}.png`;
+                            } else {
+                                e.target.src = "/doraemon_cards/front.jpg";
+                                e.target.className = "absolute inset-0 w-full h-full object-cover opacity-50";
+                            }
                         }}
                     />
                 )}

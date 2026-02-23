@@ -37,15 +37,20 @@ const DecksTab = ({ equippedDeck, onEquip }) => {
                         <motion.div
                             key={deck.id}
                             whileHover={!deck.locked ? { y: -10 } : {}}
+                            onClick={() => !deck.locked && onEquip(deck)}
                             className={`relative overflow-hidden group rounded-3xl border-2 transition-all duration-500 ${deck.borderColor
-                                } ${deck.locked ? 'opacity-60 grayscale' : 'cursor-pointer'}`}
+                                } ${deck.locked ? 'opacity-60 grayscale' : 'cursor-pointer'} ${isEquipped ? 'ring-4 ring-cyan-400/50 scale-[1.02]' : ''}`}
                         >
                             {/* Background Gradient */}
                             <div className={`absolute inset-0 bg-gradient-to-br ${deck.color} opacity-40 group-hover:opacity-60 transition-opacity`} />
 
-                            {/* NEW: Deck Image Preview */}
+                            {/* Deck Image Preview */}
                             <div className="h-48 overflow-hidden relative">
-                                <img src="/doraemon-front.jpg" alt={deck.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                <img
+                                    src="/doraemon_cards/front.jpg"
+                                    alt={deck.title}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
                                 <div className="absolute inset-0 bg-gradient-to-t from-[#050510] to-transparent opacity-60" />
                             </div>
 
@@ -57,6 +62,11 @@ const DecksTab = ({ equippedDeck, onEquip }) => {
                                     <div className={`p-3 rounded-2xl bg-black/40 border ${deck.borderColor}`}>
                                         {deck.locked ? <Lock size={20} className="text-gray-500" /> : <Users size={20} className="text-cyan-400" />}
                                     </div>
+                                    {isEquipped && (
+                                        <div className="bg-cyan-500 text-black px-3 py-1 rounded-full text-[10px] font-black tracking-widest animate-pulse">
+                                            EQUIPPED
+                                        </div>
+                                    )}
                                     <div className="flex items-center gap-1 bg-black/40 px-3 py-1 rounded-full border border-white/5">
                                         <Star size={10} className="text-yellow-500 fill-yellow-500" />
                                         <span className="text-[10px] font-bold text-white">{deck.rating}</span>
@@ -83,19 +93,16 @@ const DecksTab = ({ equippedDeck, onEquip }) => {
                                     </div>
                                 </div>
 
-                                {/* Interaction */}
-                                <button
-                                    onClick={() => !deck.locked && onEquip(deck)}
-                                    disabled={deck.locked}
-                                    className={`w-full py-4 rounded-2xl font-black tracking-[0.2em] text-xs transition-all ${isEquipped
-                                        ? 'bg-green-500 text-black shadow-[0_0_20px_rgba(34,197,94,0.3)]'
-                                        : deck.locked
-                                            ? 'bg-white/5 text-gray-600 border border-white/5'
-                                            : 'bg-white text-black hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]'
-                                        }`}
+                                {/* Interaction Visual */}
+                                <div className={`w-full py-4 rounded-2xl font-black tracking-[0.2em] text-xs transition-all text-center ${isEquipped
+                                    ? 'bg-cyan-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.3)]'
+                                    : deck.locked
+                                        ? 'bg-white/5 text-gray-600 border border-white/5'
+                                        : 'bg-white text-black hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]'
+                                    }`}
                                 >
                                     {isEquipped ? 'EQUIPPED' : deck.locked ? 'COMING SOON' : 'EQUIP DECK'}
-                                </button>
+                                </div>
                             </div>
 
                             {/* Locked Blur FX */}
