@@ -11,9 +11,9 @@ const Sidebar = ({ activeTab, setActiveTab, isArenaLocked }) => {
     ];
 
     return (
-        <div className="w-20 bg-black/40 backdrop-blur-3xl border-r border-white/10 flex flex-col items-center py-8 z-50">
+        <div className="w-20 bg-[var(--bg-primary)] border-r border-white/5 flex flex-col items-center py-8 z-50">
             {/* Logo */}
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center mb-12 shadow-[0_0_20px_rgba(34,211,238,0.3)]">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--accent-blue)] to-blue-600 flex items-center justify-center mb-12 shadow-[0_0_20px_rgba(0,209,255,0.3)]">
                 <span className="font-black text-black italic text-xl">T</span>
             </div>
 
@@ -27,8 +27,8 @@ const Sidebar = ({ activeTab, setActiveTab, isArenaLocked }) => {
                         <button
                             key={item.id}
                             onClick={() => !item.locked && setActiveTab(item.id)}
-                            className={`relative group p-4 rounded-2xl transition-all duration-300 ${item.locked ? 'opacity-20 cursor-not-allowed' : 'hover:bg-white/10 cursor-pointer'
-                                } ${isActive ? 'bg-cyan-500/10 text-cyan-400' : 'text-gray-500'}`}
+                            className={`relative group p-4 rounded-2xl transition-all duration-300 ${item.locked ? 'opacity-20 cursor-not-allowed' : 'hover:bg-white/5 cursor-pointer'
+                                } ${isActive ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] neon-glow-blue' : 'text-gray-500'}`}
                         >
                             <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
 
@@ -41,8 +41,8 @@ const Sidebar = ({ activeTab, setActiveTab, isArenaLocked }) => {
                             {isActive && (
                                 <motion.div
                                     layoutId="activeTab"
-                                    className="absolute left-0 w-1 h-8 bg-cyan-400 rounded-r-full"
-                                    style={{ top: '50%', translateY: '-50%' }}
+                                    className="absolute left-0 w-1 h-8 rounded-r-full"
+                                    style={{ top: '50%', translateY: '-50%', backgroundColor: 'var(--accent-blue)' }}
                                 />
                             )}
                         </button>

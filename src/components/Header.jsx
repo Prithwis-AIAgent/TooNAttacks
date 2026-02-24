@@ -13,20 +13,20 @@ const Header = ({ equippedDeck }) => {
     ];
 
     return (
-        <header className="h-16 border-b border-white/10 flex items-center justify-between px-8 bg-black/20 backdrop-blur-md z-40">
+        <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-black/40 backdrop-blur-xl z-40">
             <div className="flex items-center gap-4">
                 <div className="flex flex-col">
                     <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Current Status</h2>
                     <div className="flex items-center gap-2">
                         {equippedDeck ? (
                             <>
-                                <ShieldCheck size={14} className="text-green-400" />
-                                <span className="text-xs font-bold text-green-400 tracking-wider">
+                                <ShieldCheck size={14} style={{ color: 'var(--accent-green)' }} />
+                                <span className="text-xs font-bold tracking-wider" style={{ color: 'var(--accent-green)' }}>
                                     {equippedDeck.title} EQUIPPED
                                 </span>
                             </>
                         ) : (
-                            <span className="text-xs font-bold text-red-500/60 tracking-wider animate-pulse">
+                            <span className="text-xs font-bold tracking-wider animate-pulse" style={{ color: 'var(--accent-red)' }}>
                                 NO DECK EQUIPPED
                             </span>
                         )}
@@ -35,15 +35,15 @@ const Header = ({ equippedDeck }) => {
             </div>
 
             <div className="flex items-center gap-6">
-                <div className="h-8 w-px bg-white/10" />
+                <div className="h-8 w-px bg-white/5" />
                 <button
                     onClick={() => setShowRules(true)}
-                    className="text-gray-400 hover:text-cyan-400 transition-colors cursor-pointer"
+                    className="text-gray-400 hover:text-[var(--accent-blue)] transition-colors cursor-pointer"
                 >
                     <Info size={18} />
                 </button>
                 <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <div className="w-2 h-2 rounded-full animate-status-pulse" style={{ backgroundColor: 'var(--accent-green)' }} />
                     <span className="text-[10px] font-bold tracking-widest text-gray-300">SERVER ONLINE</span>
                 </div>
             </div>

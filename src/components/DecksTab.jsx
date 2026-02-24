@@ -21,7 +21,7 @@ const DecksTab = ({ equippedDeck, onEquip }) => {
         <div className="p-12 max-w-7xl mx-auto overflow-visible">
             <header className="mb-12">
                 <h1 className="text-4xl font-black italic tracking-tighter mb-2">
-                    CARD <span className="text-cyan-400">COLLECTION</span>
+                    CARD <span style={{ color: 'var(--accent-yellow)' }}>COLLECTION</span>
                 </h1>
                 <p className="text-gray-500 text-sm tracking-wide max-w-xl">
                     Choose your arsenal. Each deck features unique character types and stat distributions.
@@ -39,7 +39,8 @@ const DecksTab = ({ equippedDeck, onEquip }) => {
                             whileHover={!deck.locked ? { y: -10 } : {}}
                             onClick={() => !deck.locked && onEquip(deck)}
                             className={`relative overflow-hidden group rounded-3xl border-2 transition-all duration-500 ${deck.borderColor
-                                } ${deck.locked ? 'opacity-60 grayscale' : 'cursor-pointer'} ${isEquipped ? 'ring-4 ring-cyan-400/50 scale-[1.02]' : ''}`}
+                                } ${deck.locked ? 'opacity-60 grayscale' : 'cursor-pointer'} ${isEquipped ? 'scale-[1.02] neon-glow-blue' : ''}`}
+                            style={{ borderColor: isEquipped ? 'var(--accent-blue)' : 'rgba(255,255,255,0.1)' }}
                         >
                             {/* Background Gradient */}
                             <div className={`absolute inset-0 bg-gradient-to-br ${deck.color} opacity-40 group-hover:opacity-60 transition-opacity`} />
@@ -51,24 +52,24 @@ const DecksTab = ({ equippedDeck, onEquip }) => {
                                     alt={deck.title}
                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#050510] to-transparent opacity-60" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] to-transparent opacity-80" />
                             </div>
 
                             {/* Frosted Glass Overlay */}
-                            <div className="relative z-10 p-8 flex flex-col h-full bg-black/40 backdrop-blur-sm">
+                            <div className="relative z-10 p-8 flex flex-col h-full bg-black/60 backdrop-blur-md">
 
                                 {/* Header */}
                                 <div className="flex justify-between items-start mb-6">
-                                    <div className={`p-3 rounded-2xl bg-black/40 border ${deck.borderColor}`}>
-                                        {deck.locked ? <Lock size={20} className="text-gray-500" /> : <Users size={20} className="text-cyan-400" />}
+                                    <div className={`p-3 rounded-2xl bg-black/40 border border-white/10`}>
+                                        {deck.locked ? <Lock size={20} className="text-gray-500" /> : <Users size={20} style={{ color: 'var(--accent-blue)' }} />}
                                     </div>
                                     {isEquipped && (
-                                        <div className="bg-cyan-500 text-black px-3 py-1 rounded-full text-[10px] font-black tracking-widest animate-pulse">
+                                        <div className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest" style={{ backgroundColor: 'var(--accent-yellow)', color: 'black' }}>
                                             EQUIPPED
                                         </div>
                                     )}
                                     <div className="flex items-center gap-1 bg-black/40 px-3 py-1 rounded-full border border-white/5">
-                                        <Star size={10} className="text-yellow-500 fill-yellow-500" />
+                                        <Star size={10} style={{ color: 'var(--accent-yellow)', fill: 'var(--accent-yellow)' }} />
                                         <span className="text-[10px] font-bold text-white">{deck.rating}</span>
                                     </div>
                                 </div>
@@ -95,11 +96,15 @@ const DecksTab = ({ equippedDeck, onEquip }) => {
 
                                 {/* Interaction Visual */}
                                 <div className={`w-full py-4 rounded-2xl font-black tracking-[0.2em] text-xs transition-all text-center ${isEquipped
-                                    ? 'bg-cyan-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.3)]'
+                                    ? 'text-black shadow-[0_0_20px_rgba(34,211,238,0.3)]'
                                     : deck.locked
                                         ? 'bg-white/5 text-gray-600 border border-white/5'
-                                        : 'bg-white text-black hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]'
+                                        : 'bg-white text-black hover:shadow-[0_0_20px_rgba(0,209,255,0.3)]'
                                     }`}
+                                    style={{
+                                        backgroundColor: isEquipped ? 'var(--accent-blue)' : deck.locked ? '' : 'white',
+                                        color: isEquipped ? 'black' : deck.locked ? '' : 'black'
+                                    }}
                                 >
                                     {isEquipped ? 'EQUIPPED' : deck.locked ? 'COMING SOON' : 'EQUIP DECK'}
                                 </div>

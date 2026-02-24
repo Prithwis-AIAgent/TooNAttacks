@@ -4,12 +4,23 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --bg-primary: #0b0e14;
+    --card-bg: #161b22;
+    --accent-yellow: #ffd700;
+    --accent-blue: #00d1ff;
+    --accent-red: #ff4b4b;
+    --accent-green: #32cd32;
+    --text-main: #ffffff;
+    --text-dim: #8b949e;
+}
+
 @layer base {
     body {
         margin: 0;
         padding: 0;
-        background: #050510;
-        color: white;
+        background: var(--bg-primary);
+        color: var(--text-main);
         overflow: hidden;
         font-family: 'Prompt', 'Outfit', sans-serif;
         font-weight: 200;
@@ -74,6 +85,34 @@
 .card-rotate-container {
     transform-style: preserve-3d;
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Neon Glow Effect */
+.neon-glow-blue {
+    box-shadow: 0 0 15px rgba(0, 209, 255, 0.3);
+}
+
+.neon-glow-yellow {
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+/* Pulsing Status Animation */
+@keyframes status-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(50, 205, 50, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 8px rgba(50, 205, 50, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(50, 205, 50, 0);
+    }
+}
+
+.animate-status-pulse {
+    animation: status-pulse 2s infinite;
 }
 
 /* Animation Utilities */
