@@ -89,14 +89,25 @@ class GameEngine {
         let tie = false;
         let maxValue = getStatValue(roundCards[0].card, chosenStat);
 
-        for (let i = 1; i < roundCards.length; i++) {
-            const currentVal = getStatValue(roundCards[i].card, chosenStat);
-            if (currentVal > maxValue) {
-                maxValue = currentVal;
-                roundWinnerIndex = i;
-                tie = false;
-            } else if (currentVal === maxValue) {
-                tie = true;
+        // Special Rule: Superiority (ID 1 beats ID 2)
+        const hasId1 = roundCards.find(rc => rc.card.id === 1 || rc.card.id === '1');
+        const hasId2 = roundCards.find(rc => rc.card.id === 2 || rc.card.id === '2');
+
+        if (hasId1 && hasId2) {
+            console.log("SUPERIORITY RULE: Card #1 defeats Card #2!");
+            roundWinnerIndex = roundCards.indexOf(hasId1);
+            tie = false;
+        } else {
+            // Standard highest value logic
+            for (let i = 1; i < roundCards.length; i++) {
+                const currentVal = getStatValue(roundCards[i].card, chosenStat);
+                if (currentVal > maxValue) {
+                    maxValue = currentVal;
+                    roundWinnerIndex = i;
+                    tie = false;
+                } else if (currentVal === maxValue) {
+                    tie = true;
+                }
             }
         }
 
