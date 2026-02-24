@@ -46,11 +46,11 @@ const DecksTab = ({ equippedDeck, onEquip }) => {
                             <div className={`absolute inset-0 bg-gradient-to-br ${deck.color} opacity-40 group-hover:opacity-60 transition-opacity`} />
 
                             {/* Deck Image Preview */}
-                            <div className="h-48 overflow-hidden relative">
+                            <div className="h-48 overflow-hidden relative bg-black flex items-center justify-center">
                                 <img
                                     src="/doraemon_cards/front.jpg"
                                     alt={deck.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    className="h-full w-auto object-contain transition-transform duration-700 group-hover:scale-110"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] to-transparent opacity-80" />
                             </div>
