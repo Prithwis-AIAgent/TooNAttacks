@@ -41,9 +41,9 @@
     }
 
     .glass-morphism {
-        background: rgba(10, 10, 26, 0.45);
-        backdrop-filter: blur(25px);
-        -webkit-backdrop-filter: blur(25px);
+        background: rgba(10, 10, 26, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     }
 }
 
