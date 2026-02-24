@@ -1,39 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, VolumeX, Music } from 'lucide-react';
+import { Music, Volume2, VolumeX } from 'lucide-react';
 
 const MusicController = ({ isArenaActive }) => {
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isMuted, setIsMuted] = useState(false);
+    const [isMusicOn, setIsMusicOn] = useState(false);
     const audioRef = useRef(null);
 
     useEffect(() => {
-        if (isArenaActive && !isMuted) {
-            audioRef.current?.play().catch(e => console.log("Autoplay prevented:", e));
-            setIsPlaying(true);
-        } else {
-            audioRef.current?.pause();
-            setIsPlaying(false);
-        }
-    }, [isArenaActive]);
-
-    const togglePlay = () => {
-        if (isPlaying) {
-            audioRef.current?.pause();
-        } else {
-            audioRef.current?.play().catch(e => console.log("Playback failed:", e));
-        }
-        setIsPlaying(!isPlaying);
-    };
-
-    const toggleMute = () => {
         if (audioRef.current) {
-            audioRef.current.muted = !isMuted;
-            setIsMuted(!isMuted);
+            audioRef.current.volume = 0.1; // Reduced to 10% volume as requested
+        }
+    }, []);
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        if (isArenaActive && isMusicOn) {
+            audio.play().catch(e => console.log("Autoplay prevented:", e));
+        } else {
+            audio.pause();
+        }
+    }, [isArenaActive, isMusicOn]);
+
+    const toggleMusic = () => {
+        const newState = !isMusicOn;
+        setIsMusicOn(newState);
+
+        if (newState && isArenaActive) {
+            audioRef.current?.play().catch(e => console.log("Playback failed:", e));
+        } else {
+            audioRef.current?.pause();
         }
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-[60] flex items-center gap-3">
+        <div className="fixed bottom-6 right-6 z-[60]">
             <audio
                 ref={audioRef}
                 src="/audio/bg-music.mp3"
@@ -41,9 +42,31 @@ const MusicController = ({ isArenaActive }) => {
                 preload="auto"
             />
 
-            <div className="flex items-center gap-2 bg-black/40 backdrop-blur-xl border border-white/5 p-2 rounded-2xl shadow-2xl transition-all hover:border-[var(--accent-blue)]/50 group">
-                {isPlaying && (
-                    <div className="flex gap-0.5 px-2">
+            <button
+                onClick={toggleMusic}
+                className={`flex items-center gap-3 px-5 py-3 rounded-2xl border transition-all duration-300 backdrop-blur-xl shadow-2xl cursor-pointer group ${isMusicOn
+                        ? 'bg-[var(--accent-blue)]/20 border-[var(--accent-blue)]/50 text-[var(--accent-blue)] shadow-[0_0_20px_rgba(0,209,255,0.2)]'
+                        : 'bg-black/60 border-white/5 text-gray-500 hover:border-white/20'
+                    }`}
+            >
+                <div className="relative">
+                    <Music size={20} className={isMusicOn ? 'animate-bounce' : ''} />
+                    {isMusicOn && (
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--accent-blue)] rounded-full animate-ping" />
+                    )}
+                </div>
+
+                <div className="flex flex-col items-start leading-none">
+                    <span className="text-[10px] font-black uppercase tracking-widest mb-0.5">
+                        BGM
+                    </span>
+                    <span className="text-[12px] font-black italic tracking-tighter">
+                        {isMusicOn ? 'ACTIVE' : 'MUTED'}
+                    </span>
+                </div>
+
+                {isMusicOn && (
+                    <div className="flex gap-0.5 ml-2">
                         {[1, 2, 3].map(i => (
                             <div
                                 key={i}
@@ -53,15 +76,7 @@ const MusicController = ({ isArenaActive }) => {
                         ))}
                     </div>
                 )}
-
-                <button
-                    onClick={toggleMute}
-                    className="p-2 text-gray-400 hover:text-[var(--accent-blue)] transition-colors rounded-xl hover:bg-white/5 cursor-pointer"
-                    title={isMuted ? "Unmute Music" : "Mute Music"}
-                >
-                    {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-                </button>
-            </div>
+            </button>
         </div>
     );
 };
