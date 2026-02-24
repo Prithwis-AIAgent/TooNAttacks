@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DecksTab from './components/DecksTab';
 import SettingsTab from './components/SettingsTab';
+import LeaderboardTab from './components/LeaderboardTab';
 import WelcomeScreen from './components/WelcomeScreen';
 import { supabase } from './lib/supabase';
 
@@ -138,6 +139,18 @@ function App() {
         // Notification or visual feedback
     };
 
+    const handleQuit = () => {
+        setIsJoined(false);
+        setGameState(null);
+        setRoomId('');
+        setLobbyMode('choice');
+        setActiveTab('decks');
+        // If in a match, notify server
+        if (gameState && gameState.roomId) {
+            socket.emit('forfeitMatch', { roomId: gameState.roomId, playerName });
+        }
+    };
+
     if (!isJoined && activeTab === 'arena') {
         // User is in arena tab but hasn't joined yet
         // This is handled by the lobby view below
@@ -167,10 +180,12 @@ function App() {
                         />
                     ) : activeTab === 'settings' ? (
                         <SettingsTab />
+                    ) : activeTab === 'leaderboard' ? (
+                        <LeaderboardTab />
                     ) : (
                         <>
-                            {!gameState ? (
-                                /* Lobby UI */
+                            {!gameState || gameState.status === 'finished' ? (
+                                /* Lobby UI (shown if no active game or game is finished) */
                                 <div className="h-full flex items-center justify-center p-4">
                                     <div className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl">
                                         <h1 className="text-3xl font-black text-white italic tracking-tighter mb-4 text-center ring-offset-cyan-400">
@@ -302,6 +317,7 @@ function App() {
                                     currentPlayerName={playerName}
                                     socket={socket}
                                     deckId={equippedDeck?.id}
+                                    onQuit={handleQuit}
                                 />
                             )}
                         </>

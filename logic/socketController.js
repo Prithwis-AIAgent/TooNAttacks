@@ -147,6 +147,21 @@ export default (io) => {
             });
         });
 
+        socket.on('forfeitMatch', ({ roomId, playerName }) => {
+            const game = activeGames[roomId];
+            if (game && game.status === 'started') {
+                game.status = 'finished';
+                io.to(roomId).emit('gameOver', {
+                    reason: `${playerName} forfeited`,
+                    leaderboard: game.engine.getLeaderboard(),
+                    finalScores: game.engine.players.map(p => ({
+                        name: p.name,
+                        points: p.points
+                    }))
+                });
+            }
+        });
+
         socket.on('disconnect', () => {
             console.log('User disconnected:', socket.id);
             // Clean up: find which room this player was in

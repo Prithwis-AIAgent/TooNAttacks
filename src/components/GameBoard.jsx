@@ -90,9 +90,10 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
 
     const handleForfeit = () => {
         if (window.confirm("Are you sure you want to forfeit the match?")) {
-            window.location.reload();
+            onQuit();
         }
     };
+
 
     // UI Position Helpers
     const getRoleStyles = (role) => {
@@ -336,11 +337,11 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
                                             rotate: Math.random() * 20 - 10
                                         }}
                                         animate={{
-                                            x: offset.x * 0.4,
-                                            y: offset.y * 0.4,
-                                            scale: isWinner ? 1 : 0.85,
+                                            x: (i - (battleResults.results.length - 1) / 2) * 220, // Spread cards horizontally
+                                            y: 0, // Keep them on the same horizontal line
+                                            scale: isWinner ? 1 : 0.9,
                                             opacity: 1,
-                                            rotate: (i - 1) * 10
+                                            rotate: (i - (battleResults.results.length - 1) / 2) * 5
                                         }}
                                         exit={{ scale: 0, opacity: 0, y: 500 }}
                                         className="absolute p-4 flex flex-col items-center"

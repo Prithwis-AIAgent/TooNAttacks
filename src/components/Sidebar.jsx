@@ -6,6 +6,7 @@ const Sidebar = ({ activeTab, setActiveTab, isArenaLocked }) => {
     const menuItems = [
         { id: 'decks', icon: LayoutGrid, label: 'Decks', locked: false },
         { id: 'arena', icon: Sword, label: 'Arena', locked: isArenaLocked },
+        { id: 'leaderboard', icon: Trophy, label: 'Rankings', locked: false },
         { id: 'settings', icon: Settings, label: 'Settings', locked: false },
     ];
 
@@ -51,9 +52,7 @@ const Sidebar = ({ activeTab, setActiveTab, isArenaLocked }) => {
 
             {/* Bottom Icons */}
             <div className="flex flex-col gap-6 text-gray-500">
-                <button className="hover:text-white transition-colors">
-                    <Trophy size={20} />
-                </button>
+                {/* Icons moved to primary nav */}
             </div>
         </div>
     );
