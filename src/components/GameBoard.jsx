@@ -5,7 +5,7 @@ import PlayerAvatar from './PlayerAvatar';
 import Leaderboard from './Leaderboard';
 import { Trophy, RefreshCw, LogOut } from 'lucide-react';
 
-const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
+const GameBoard = ({ gameState, currentPlayerName, socket, deckId, onQuit }) => {
     const [battleResults, setBattleResults] = useState(null);
     const [stage, setStage] = useState('idle'); // idle, pending, revealed
     const [showLeaderboard, setShowLeaderboard] = useState(false);
