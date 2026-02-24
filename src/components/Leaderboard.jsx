@@ -10,9 +10,9 @@ const Leaderboard = ({ players = [] }) => {
     useEffect(() => {
         const fetchGlobal = async () => {
             const { data, error } = await supabase
-                .from('profiles')
-                .select('name, points')
-                .order('points', { ascending: false })
+                .from('leaderboard')
+                .select('player_name, score')
+                .order('score', { ascending: false })
                 .limit(10);
 
             if (!error && data) {
@@ -23,7 +23,7 @@ const Leaderboard = ({ players = [] }) => {
         fetchGlobal();
     }, []);
 
-    const displayPlayers = globalScores.length > 0 ? globalScores : [...players].sort((a, b) => b.points - a.points);
+    const displayPlayers = globalScores.length > 0 ? globalScores : [...players].map(p => ({ player_name: p.name, score: p.points })).sort((a, b) => b.score - a.score);
 
     return (
         <div className="w-72 bg-black/60 backdrop-blur-3xl rounded-[32px] border border-white/10 overflow-hidden shadow-2xl">
@@ -45,7 +45,7 @@ const Leaderboard = ({ players = [] }) => {
 
                     return (
                         <motion.div
-                            key={player.name}
+                            key={player.player_name + index}
                             initial={{ x: 20, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ delay: index * 0.05 }}
@@ -58,7 +58,7 @@ const Leaderboard = ({ players = [] }) => {
                                 </span>
                                 <div>
                                     <p className="text-xs font-black italic text-white uppercase tracking-tight truncate w-24">
-                                        {player.name}
+                                        {player.player_name}
                                     </p>
                                     <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none">
                                         {isTop3 ? 'Master Pilot' : 'Rookie'}
@@ -67,7 +67,7 @@ const Leaderboard = ({ players = [] }) => {
                             </div>
 
                             <div className="text-right">
-                                <p className="text-sm font-black italic text-cyan-400 leading-none">{player.points || 0}</p>
+                                <p className="text-sm font-black italic text-cyan-400 leading-none">{player.score || 0}</p>
                                 <p className="text-[7px] font-bold text-gray-600 uppercase tracking-widest">Pts</p>
                             </div>
                         </motion.div>

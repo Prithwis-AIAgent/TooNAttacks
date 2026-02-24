@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DecksTab from './components/DecksTab';
 import SettingsTab from './components/SettingsTab';
+import WelcomeScreen from './components/WelcomeScreen';
 import { supabase } from './lib/supabase';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
@@ -23,7 +24,14 @@ function App() {
     const [equippedDeck, setEquippedDeck] = useState(null);
     const [lobbyMode, setLobbyMode] = useState('choice'); // 'choice', 'create', 'join'
     const [session, setSession] = useState(null);
+    const [isNameSet, setIsNameSet] = useState(false);
 
+    const handleWelcomeSubmit = (name) => {
+        setPlayerName(name);
+        setIsNameSet(true);
+    };
+
+    if (!isNameSet) return <WelcomeScreen onNameSubmit={handleWelcomeSubmit} />;
     useEffect(() => {
         // Handle Supabase Auth Session
         supabase.auth.getSession().then(({ data: { session } }) => {

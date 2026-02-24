@@ -58,7 +58,21 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
         });
 
         socket.on('gameOver', (data) => {
+            setGameState(prev => ({ ...prev, status: 'finished' }));
             setGameOverData(data);
+
+            // Save local player score if match finished gracefully
+            if (data.finalScores) {
+                const me = data.finalScores.find(p => p.name === currentPlayerName);
+                if (me && me.points > 0) {
+                    supabase
+                        .from('leaderboard')
+                        .insert([{ player_name: me.name, score: me.points }])
+                        .then(({ error }) => {
+                            if (error) console.error("Score save error:", error.message);
+                        });
+                }
+            }
         });
 
         socket.on('updateState', (state) => {

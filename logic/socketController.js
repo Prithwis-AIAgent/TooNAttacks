@@ -179,18 +179,16 @@ export default (io) => {
         });
     });
 
-    // Helper to persist scores to Supabase
     async function saveMatchResults(scores) {
         console.log("Saving match results to Supabase...");
         for (const score of scores) {
             try {
-                // Upsert based on name (Note: In a real app, use user_id)
                 const { error } = await supabase
-                    .from('profiles')
-                    .upsert({
-                        name: score.name,
-                        points: score.points // Actually you should probably ADD points, but for now we'll set it
-                    }, { onConflict: 'name' });
+                    .from('leaderboard')
+                    .insert({
+                        player_name: score.name,
+                        score: score.points
+                    });
 
                 if (error) console.error("Supabase Save Error:", error.message);
             } catch (err) {
