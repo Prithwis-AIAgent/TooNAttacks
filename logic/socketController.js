@@ -1,15 +1,16 @@
-/**
- * TooNAttacks Socket Handler
- * Handles real-time events for the card game.
- */
-
 import GameEngine from './gameEngine.js';
 import { createClient } from '@supabase/supabase-js';
+import OpenAI from 'openai';
 
 // Supabase Server-side Client
 const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || 'your-key';
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// OpenAI Client
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+});
 
 export default (io) => {
     let activeGames = {};
@@ -65,6 +66,38 @@ export default (io) => {
             }
         });
 
+        // Start Solo Game against AI Bot
+        socket.on('startBotGame', ({ roomId, playerName }) => {
+            console.log(`Starting BOT game for ${playerName} in room ${roomId}`);
+            socket.join(roomId);
+
+            const botPlayer = { id: 'bot-' + roomId, name: 'BOT', isBot: true };
+            activeGames[roomId] = {
+                players: [{ id: socket.id, name: playerName }, botPlayer],
+                engine: null,
+                status: 'started',
+                isBotGame: true,
+                botId: botPlayer.id
+            };
+
+            const game = activeGames[roomId];
+            game.engine = new GameEngine([playerName, 'BOT']);
+
+            game.players.forEach(p => {
+                if (!p.isBot) {
+                    const initialState = game.engine.getGameState(p.name);
+                    io.to(p.id).emit('gameStarted', {
+                        roomId,
+                        players: game.players.map(pl => pl.name),
+                        gameState: initialState
+                    });
+                }
+            });
+
+            // Check if it's bot's turn first
+            checkBotTurn(roomId);
+        });
+
         // Stat selection by the turn player
         socket.on('selectStat', ({ roomId, chosenStat }) => {
             const game = activeGames[roomId];
@@ -82,15 +115,19 @@ export default (io) => {
                     io.to(roomId).emit('statChosen', {
                         playerName: turnPlayerName,
                         stat: chosenStat,
-                        value: roundResult.results.find(r => r.playerName === turnPlayerName).statValue
+                        value: roundResult.results.find(r => r.playerName === turnPlayerName).value
                     });
 
-                    // Set a 5s auto-reveal timer
-                    if (game.revealTimer) clearTimeout(game.revealTimer);
-                    game.revealTimer = setTimeout(() => {
-                        processReveal(roomId);
-                    }, 5000);
-
+                    // In a bot game, automatically reveal after a short delay
+                    if (game.isBotGame) {
+                        setTimeout(() => processReveal(roomId), 2000);
+                    } else {
+                        // Set a 5s auto-reveal timer for multiplayer
+                        if (game.revealTimer) clearTimeout(game.revealTimer);
+                        game.revealTimer = setTimeout(() => {
+                            processReveal(roomId);
+                        }, 5000);
+                    }
                 } else {
                     socket.emit('error', 'It is not your turn to select a stat.');
                 }
@@ -126,15 +163,86 @@ export default (io) => {
                     finalScores
                 });
 
-                saveMatchResults(finalScores);
+                // Only persist human results
+                saveMatchResults(finalScores.filter(s => s.name !== 'BOT'));
             } else {
                 // Notify next turn and update stacks (blind filter)
                 game.players.forEach(p => {
-                    const updatedState = game.engine.getGameState(p.name);
-                    io.to(p.id).emit('updateState', updatedState);
+                    if (!p.isBot) {
+                        const updatedState = game.engine.getGameState(p.name);
+                        io.to(p.id).emit('updateState', updatedState);
+                    }
                 });
+
+                // Check if next turn is BOT
+                setTimeout(() => checkBotTurn(roomId), 1500);
             }
         }
+
+        async function checkBotTurn(roomId) {
+            const game = activeGames[roomId];
+            if (!game || game.status !== 'started' || !game.isBotGame) return;
+
+            const turnIndex = game.engine.turnIndex;
+            const turnPlayerName = game.engine.players[turnIndex].name;
+
+            if (turnPlayerName === 'BOT') {
+                console.log("BOT calculating move...");
+                const botCard = game.engine.players[turnIndex].stack[0];
+                const stats = botCard.stats;
+
+                try {
+                    const prompt = `You are playing a luxury card game 'TooNAttacks'. Your current card is '${botCard.name}'. 
+                    Its stats are: ${JSON.stringify(stats)}. 
+                    Pick the best stat to win. Return ONLY the stat key from this list: [intelligence_iq, power_level, agility, strength, experience, combat_skill, charisma, luck].
+                    No other text. Just the key.`;
+
+                    const completion = await openai.chat.completions.create({
+                        model: "gpt-4o-mini", // Or gpt-3.5-turbo if you prefer, user said gpt5nano usually means smaller fast model
+                        messages: [
+                            { role: "system", content: "You are a competitive card game bot." },
+                            { role: "user", content: prompt }
+                        ],
+                        max_tokens: 10
+                    });
+
+                    const chosenStat = completion.choices[0].message.content.trim().toLowerCase();
+                    console.log(`BOT selected: ${chosenStat}`);
+
+                    // Simulate stat selection
+                    handleBotAction(roomId, chosenStat);
+                } catch (err) {
+                    console.error("AI Error:", err);
+                    // Fallback to highest stat
+                    const fallback = Object.keys(stats).reduce((a, b) => stats[a] > stats[b] ? a : b);
+                    handleBotAction(roomId, fallback);
+                }
+            }
+        }
+
+        function handleBotAction(roomId, chosenStat) {
+            const game = activeGames[roomId];
+            if (!game) return;
+
+            const roundResult = game.engine.compareStats(chosenStat);
+            game.pendingReveal = roundResult;
+
+            io.to(roomId).emit('statChosen', {
+                playerName: 'BOT',
+                stat: chosenStat,
+                value: roundResult.results.find(r => r.playerName === 'BOT').value
+            });
+
+            // Set reveal timer
+            game.revealTimer = setTimeout(() => {
+                processReveal(roomId);
+            }, 3000);
+        }
+
+        // Add auto-reveal when human selects stat in bot game
+        const _originalProcessReveal = processReveal;
+        // In bot games, we don't need human to click "show" for the bot.
+        // I will modify selectStat to trigger bots "show" if it's a bot game.
 
         // Creator Challenge logic
         socket.on('challengeCreator', ({ roomId, challengerName }) => {

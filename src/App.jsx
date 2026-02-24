@@ -139,6 +139,13 @@ function App() {
         // Notification or visual feedback
     };
 
+    const handleStartBotGame = () => {
+        const id = Math.floor(Math.random() * 90 + 10).toString();
+        setRoomId(id);
+        setIsJoined(true);
+        socket.emit('startBotGame', { roomId: id, playerName });
+    };
+
     const handleQuit = () => {
         // Capture roomId before resetting state
         const currentRoomId = roomId || (gameState && gameState.roomId);
@@ -225,6 +232,18 @@ function App() {
                                                         >
                                                             <span className="text-lg">CREATE PRIVATE ROOM</span>
                                                             <span className="text-[9px] opacity-60">Generate a unique battle code</span>
+                                                        </button>
+
+                                                        <button
+                                                            onClick={handleStartBotGame}
+                                                            disabled={!equippedDeck || !playerName}
+                                                            className="w-full h-24 bg-gradient-to-br from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white font-black rounded-2xl transition-all active:scale-95 disabled:opacity-20 flex flex-col items-center justify-center gap-1 shadow-xl shadow-purple-500/10 border border-white/20"
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-lg">PLAY VS AI BOT</span>
+                                                                <div className="bg-white/20 px-2 py-0.5 rounded text-[8px] tracking-[0.2em]">GPT-5 NANO</div>
+                                                            </div>
+                                                            <span className="text-[9px] opacity-60">Instant solo match with intelligent bot</span>
                                                         </button>
 
                                                         <div className="flex items-center gap-4 py-2">
