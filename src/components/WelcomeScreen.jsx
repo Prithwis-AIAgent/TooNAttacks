@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sword, User } from 'lucide-react';
+import { User } from 'lucide-react';
 
 const WelcomeScreen = ({ onNameSubmit }) => {
     const [name, setName] = useState('');
@@ -15,60 +15,56 @@ const WelcomeScreen = ({ onNameSubmit }) => {
     };
 
     return (
-        <div className="h-screen w-full flex items-center justify-center bg-[#050510] overflow-hidden p-4 relative">
-            {/* Background Decorations */}
-            <div className="absolute top-1/4 -left-20 w-80 h-80 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="h-screen w-full flex items-center justify-center overflow-hidden relative font-['Prompt']">
+            {/* Full-screen Background Image */}
+            <div
+                className="absolute inset-0 bg-cover bg-center z-0"
+                style={{ backgroundImage: 'url("/assets/splash.jpg")' }}
+            />
 
-            <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="w-full max-w-lg bg-white/5 backdrop-blur-3xl border border-white/10 p-12 rounded-[48px] shadow-2xl relative z-10 text-center"
-            >
-                <div className="w-24 h-24 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-[32px] flex items-center justify-center mx-auto mb-10 shadow-[0_0_30px_rgba(34,211,238,0.3)]">
-                    <Sword size={48} className="text-black" />
-                </div>
+            {/* Overlay for better readability if needed, but keeping it light to show artwork */}
+            <div className="absolute inset-0 bg-black/10 z-[1]" />
 
-                <div className="mb-10">
-                    <h1 className="text-5xl font-black italic tracking-tighter text-white mb-3">
-                        TOON <span className="text-cyan-400">ATTACKS</span>
-                    </h1>
-                    <p className="text-gray-400 text-sm font-bold uppercase tracking-[0.3em] opacity-60">
-                        Battle for Card Supremacy
-                    </p>
-                </div>
+            <div className="relative z-10 w-full max-w-lg mt-32 md:mt-48">
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    className="flex flex-col items-center gap-6"
+                >
+                    {/* The "Enter Arena" Area Overlay */}
+                    <div className="w-full bg-black/40 backdrop-blur-md border border-white/20 p-8 rounded-[40px] shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="text-center mb-6">
+                                <h2 className="text-xs font-black uppercase tracking-[0.4em] text-white/60 mb-2">Identify Yourself</h2>
+                                <p className="text-xl font-black text-white tracking-tight">WHO IS ENTERING THE ARENA?</p>
+                            </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="relative group">
-                        <User className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-cyan-400 transition-colors" size={20} />
-                        <input
-                            type="text"
-                            placeholder="YOUR NICKNAME"
-                            value={name}
-                            onChange={(e) => setName(e.target.value.toUpperCase())}
-                            autoFocus
-                            className="w-full bg-black/40 border-2 border-white/5 rounded-3xl px-16 py-6 text-white text-xl font-black italic tracking-widest focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-500/10 transition-all placeholder:text-gray-700"
-                        />
+                            <div className="relative group">
+                                <User className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-cyan-400 transition-colors" size={20} />
+                                <input
+                                    type="text"
+                                    placeholder="Enter Nickname..."
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value.toUpperCase())}
+                                    autoFocus
+                                    className="w-full bg-black/60 border-2 border-white/10 rounded-2xl px-16 py-5 text-white text-lg font-black tracking-widest focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-500/10 transition-all placeholder:text-gray-600 uppercase"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-400 hover:to-yellow-400 text-white font-black italic text-2xl py-6 rounded-2xl transition-all shadow-[0_10px_30px_rgba(249,115,22,0.4)] hover:scale-[1.02] active:scale-95 border-b-8 border-orange-700 active:border-b-0 uppercase tracking-tighter"
+                            >
+                                Enter Arena
+                            </button>
+                        </form>
                     </div>
 
-                    <button
-                        type="submit"
-                        className="w-full bg-white hover:bg-cyan-50 text-black font-black italic text-xl py-6 rounded-3xl transition-all shadow-xl hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 group"
-                    >
-                        <span>ENTER ARENA</span>
-                        <motion.div
-                            animate={{ x: [0, 5, 0] }}
-                            transition={{ repeat: Infinity, duration: 1.5 }}
-                        >
-                            <Sword size={24} className="group-hover:rotate-45 transition-transform" />
-                        </motion.div>
-                    </button>
-                </form>
-
-                <p className="mt-10 text-[10px] text-gray-600 font-bold uppercase tracking-[0.4em] opacity-40">
-                    Supabase & Socket.io Powered
-                </p>
-            </motion.div>
+                    <p className="text-[10px] text-white font-bold uppercase tracking-[0.5em] opacity-40 drop-shadow-md">
+                        2026 EDITION • SUPABASE POWERED
+                    </p>
+                </motion.div>
+            </div>
         </div>
     );
 };
