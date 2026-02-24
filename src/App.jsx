@@ -348,6 +348,8 @@ function App() {
                     )}
                 </main>
             </div>
+            {/* Background Music Controller */}
+            <MusicController isArenaActive={activeTab === 'arena'} />
         </div>
     );
 }
