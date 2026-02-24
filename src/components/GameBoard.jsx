@@ -295,29 +295,50 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
                 );
             })}
 
-            {/* Selection Notification Banner */}
+            {/* Selection Notification / Draw Banner */}
             <AnimatePresence>
-                {stage === 'pending' && pendingShow && (
+                {(stage === 'pending' && pendingShow) || (stage === 'revealed' && battleResults?.winnerName === 'Tie') ? (
                     <motion.div
                         initial={{ y: -100, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: -100, opacity: 0 }}
                         className="absolute top-10 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2"
                     >
-                        <div className="bg-white text-black px-10 py-4 rounded-3xl font-black italic shadow-2xl skew-x-[-10deg] border-4 border-cyan-500 ring-4 ring-black/50">
-                            <span className="text-blue-600">{pendingShow.playerName.toUpperCase()}</span>
-                            <span className="mx-3 opacity-40">CHOSE</span>
-                            <span className="text-red-500">{pendingShow.stat.toUpperCase()} : {pendingShow.value}</span>
-                        </div>
+                        {battleResults?.winnerName === 'Tie' ? (
+                            <div className="bg-orange-500 text-black px-12 py-5 rounded-3xl font-black italic shadow-[0_0_50px_rgba(249,115,22,0.4)] skew-x-[-10deg] border-4 border-white ring-4 ring-black/50">
+                                <span className="text-3xl tracking-tighter">IT'S A DRAW!</span>
+                            </div>
+                        ) : (
+                            <div className="bg-white text-black px-10 py-4 rounded-3xl font-black italic shadow-2xl skew-x-[-10deg] border-4 border-cyan-500 ring-4 ring-black/50">
+                                <span className="text-blue-600">{pendingShow.playerName.toUpperCase()}</span>
+                                <span className="mx-3 opacity-40">CHOSE</span>
+                                <span className="text-red-500">{pendingShow.stat.toUpperCase()} : {pendingShow.value}</span>
+                            </div>
+                        )}
                         <p className="text-[10px] text-cyan-400 font-bold uppercase tracking-[0.3em] animate-pulse">
-                            Waiting for opponent reveal...
+                            {battleResults?.winnerName === 'Tie' ? "Cards remain in the pool..." : "Waiting for opponent reveal..."}
                         </p>
                     </motion.div>
-                )}
+                ) : null}
             </AnimatePresence>
 
-            {/* Central Battle Arena */}
+            {/* Central Battle Arena & Limbo Pool */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+                {/* Limbo Pool Indicator */}
+                {battleResults?.limboCount > 0 && (
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute top-[40%] text-center"
+                    >
+                        <div className="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-2xl flex items-center gap-2 shadow-xl">
+                            <Star className="text-yellow-400 fill-yellow-400" size={14} />
+                            <span className="text-xs font-black italic text-white tracking-widest">
+                                POOL: {battleResults.limboCount} CARDS
+                            </span>
+                        </div>
+                    </motion.div>
+                )}
                 <AnimatePresence>
                     {stage === 'revealed' && battleResults && (
                         <div className="relative w-full h-full flex items-center justify-center">

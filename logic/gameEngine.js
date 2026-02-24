@@ -27,6 +27,7 @@ class GameEngine {
         this.distributeCards();
         this.currentRound = 0;
         this.turnIndex = 0; // Index of player who picks the stat
+        this.limboCards = []; // Cards held over from tied rounds
     }
 
     loadCards() {
@@ -103,26 +104,23 @@ class GameEngine {
 
         if (!tie) {
             const winner = this.players[roundWinnerIndex];
-            winner.stack.push(...cardsToMove); // Winner gets all cards at bottom of stack
+            // Winner gets current cards + any cards from previous ties
+            winner.stack.push(...cardsToMove);
+            if (this.limboCards.length > 0) {
+                winner.stack.push(...this.limboCards);
+                this.limboCards = [];
+            }
             winner.points += 5; // Award 5 points
             this.updateLeaderboard(winner.name, 5);
+            this.turnIndex = roundWinnerIndex;
         } else {
-            // In case of a tie, cards are usually discarded or held for next round.
-            // For this implementation, we'll put them back at the bottom of respective owners or discard.
-            // Let's put them back at the bottom for now to avoid losing cards.
-            this.players.forEach((p, idx) => {
-                p.stack.push(roundCards[idx].card);
-            });
+            // Tie: Move cards to limbo
+            this.limboCards.push(...cardsToMove);
+            // On a tie, rotation continues to the next player
+            this.turnIndex = (this.turnIndex + 1) % this.players.length;
         }
 
         this.currentRound++;
-        // The winner of the round typically picks the next stat, or it rotates.
-        // User didn't specify, so let's keep rotation or set to winner.
-        if (!tie) {
-            this.turnIndex = roundWinnerIndex;
-        } else {
-            this.turnIndex = (this.turnIndex + 1) % this.players.length;
-        }
 
         return {
             round: this.currentRound,
@@ -133,6 +131,7 @@ class GameEngine {
                 value: getStatValue(rc.card, chosenStat)
             })),
             winnerName: tie ? "Tie" : this.players[roundWinnerIndex].name,
+            limboCount: this.limboCards.length,
             leaderboard: this.getLeaderboard()
         };
     }

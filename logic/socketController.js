@@ -151,14 +151,27 @@ export default (io) => {
             const game = activeGames[roomId];
             if (game && game.status === 'started') {
                 game.status = 'finished';
+
+                // Award points to other players
+                const others = game.engine.players.filter(p => p.name !== playerName);
+                others.forEach(p => {
+                    p.points += 10; // Award 10 points for a forfeit win
+                    game.engine.updateLeaderboard(p.name, 10);
+                });
+
+                const finalScores = game.engine.players.map(p => ({
+                    name: p.name,
+                    points: p.points
+                }));
+
                 io.to(roomId).emit('gameOver', {
                     reason: `${playerName} forfeited`,
                     leaderboard: game.engine.getLeaderboard(),
-                    finalScores: game.engine.players.map(p => ({
-                        name: p.name,
-                        points: p.points
-                    }))
+                    finalScores
                 });
+
+                // Persist results
+                saveMatchResults(finalScores);
             }
         });
 
@@ -177,14 +190,26 @@ export default (io) => {
                     // If a game was active, it's now over due to forfeit
                     if (game.status === 'started' && game.engine) {
                         game.status = 'finished';
+
+                        // Award points to remaining players
+                        const remaining = game.engine.players.filter(p => p.id !== socket.id);
+                        remaining.forEach(p => {
+                            p.points += 10;
+                            game.engine.updateLeaderboard(p.name, 10);
+                        });
+
+                        const finalScores = game.engine.players.map(p => ({
+                            name: p.name,
+                            points: p.points
+                        }));
+
                         io.to(rId).emit('gameOver', {
                             reason: `${playerName} disconnected`,
                             leaderboard: game.engine.getLeaderboard(),
-                            finalScores: game.engine.players.map(p => ({
-                                name: p.name,
-                                points: p.points
-                            }))
+                            finalScores
                         });
+
+                        saveMatchResults(finalScores);
                     } else {
                         // Just notify others of the lobby change
                         io.to(rId).emit('playerJoined', game.players);
