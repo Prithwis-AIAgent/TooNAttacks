@@ -31,7 +31,6 @@ function App() {
         setIsNameSet(true);
     };
 
-    if (!isNameSet) return <WelcomeScreen onNameSubmit={handleWelcomeSubmit} />;
     useEffect(() => {
         // Handle Supabase Auth Session
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -144,6 +143,7 @@ function App() {
         // This is handled by the lobby view below
     }
 
+    if (!isNameSet) return <WelcomeScreen onNameSubmit={handleWelcomeSubmit} />;
 
     return (
         <div className="flex h-screen bg-[#050510] text-white overflow-hidden font-['Outfit']">
