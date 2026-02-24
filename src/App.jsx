@@ -7,6 +7,7 @@ import DecksTab from './components/DecksTab';
 import SettingsTab from './components/SettingsTab';
 import LeaderboardTab from './components/LeaderboardTab';
 import WelcomeScreen from './components/WelcomeScreen';
+import MusicController from './components/MusicController';
 import { supabase } from './lib/supabase';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
