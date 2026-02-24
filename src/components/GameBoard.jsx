@@ -105,14 +105,19 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
         return offsets[role] || { x: 0, y: 0 };
     };
 
-    // Stats Selection Box Layout
-    const statButtons = [
-        { id: 'strength', label: 'STR' },
+    // Stats Selection Box Layout - 4 on left, 4 on right to match card rows
+    const leftStatButtons = [
+        { id: 'id', label: 'NO.' },
         { id: 'height_ft', label: 'HGT' },
-        { id: 'weight_kg', label: 'WGT' },
         { id: 'intelligence_iq', label: 'IQ' },
-        { id: 'speed_hp', label: 'SPD' },
         { id: 'gadgets', label: 'GDG' }
+    ];
+
+    const rightStatButtons = [
+        { id: 'strength', label: 'STR' },
+        { id: 'weight_kg', label: 'WGT' },
+        { id: 'speed_hp', label: 'SPD' },
+        { id: 'power', label: 'PWR' }
     ];
 
     useEffect(() => {
@@ -199,12 +204,12 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
                             <div className="relative flex items-center gap-6">
                                 {/* Side Stats (Left side only for local player) */}
                                 {isMyPos && isMyTurn && stage === 'idle' && (
-                                    <div className="grid grid-cols-1 gap-2">
-                                        {statButtons.slice(0, 3).map(stat => (
+                                    <div className="flex flex-col gap-[3px] py-1 mt-[115px]">
+                                        {leftStatButtons.map(stat => (
                                             <button
                                                 key={stat.id}
                                                 onClick={() => handleStatSelect(stat.id)}
-                                                className="w-14 h-10 bg-white/10 hover:bg-cyan-500/40 border border-cyan-500/20 rounded-lg flex items-center justify-center text-[9px] font-black text-white transition-all hover:scale-110 active:scale-90"
+                                                className="w-14 h-[22px] bg-white/10 hover:bg-cyan-500/40 border border-cyan-500/20 rounded-md flex items-center justify-center text-[8px] font-black text-white transition-all hover:scale-110 active:scale-90"
                                             >
                                                 {stat.label}
                                             </button>
@@ -257,12 +262,12 @@ const GameBoard = ({ gameState, currentPlayerName, socket, deckId }) => {
 
                                 {/* Side Stats (Right side only for local player) */}
                                 {isMyPos && isMyTurn && stage === 'idle' && (
-                                    <div className="grid grid-cols-1 gap-2">
-                                        {statButtons.slice(3, 6).map(stat => (
+                                    <div className="flex flex-col gap-[3px] py-1 mt-[115px]">
+                                        {rightStatButtons.map(stat => (
                                             <button
                                                 key={stat.id}
                                                 onClick={() => handleStatSelect(stat.id)}
-                                                className="w-14 h-10 bg-white/10 hover:bg-cyan-500/40 border border-cyan-500/20 rounded-lg flex items-center justify-center text-[9px] font-black text-white transition-all hover:scale-110 active:scale-90"
+                                                className="w-14 h-[22px] bg-white/10 hover:bg-cyan-500/40 border border-cyan-500/20 rounded-md flex items-center justify-center text-[8px] font-black text-white transition-all hover:scale-110 active:scale-90"
                                             >
                                                 {stat.label}
                                             </button>

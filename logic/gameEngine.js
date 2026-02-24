@@ -79,12 +79,17 @@ class GameEngine {
             card: p.stack.shift() // Pick top card
         }));
 
+        const getStatValue = (card, stat) => {
+            if (stat === 'id') return card.id;
+            return card.stats[stat] || 0;
+        };
+
         let roundWinnerIndex = 0;
         let tie = false;
-        let maxValue = roundCards[0].card.stats[chosenStat];
+        let maxValue = getStatValue(roundCards[0].card, chosenStat);
 
         for (let i = 1; i < roundCards.length; i++) {
-            const currentVal = roundCards[i].card.stats[chosenStat];
+            const currentVal = getStatValue(roundCards[i].card, chosenStat);
             if (currentVal > maxValue) {
                 maxValue = currentVal;
                 roundWinnerIndex = i;
@@ -125,7 +130,7 @@ class GameEngine {
             results: roundCards.map(rc => ({
                 playerName: rc.playerName,
                 card: rc.card, // Send full card object for complete UI
-                value: rc.card.stats[chosenStat]
+                value: getStatValue(rc.card, chosenStat)
             })),
             winnerName: tie ? "Tie" : this.players[roundWinnerIndex].name,
             leaderboard: this.getLeaderboard()

@@ -83,48 +83,52 @@ const Card = ({ card, isFaceUp = true, onStatClick, disabled, size = 'md' }) => 
 
                 {/* Stats Table Section */}
                 <div className="bg-[#bcebfe] m-0.5 rounded-sm p-0.5 flex flex-col gap-0.5 border border-black/10">
-                    {/* ID / Row 1 */}
-                    <div className="flex justify-between items-center text-[7px] font-black border-b border-blue-400/30 px-1 py-0.5">
+                    {/* Row 1: No. and Strength */}
+                    <div className="grid grid-cols-[1fr_auto_1.2fr] items-center text-[7px] font-black border-b border-blue-400/30 px-1 py-0.5">
                         <span className="text-blue-800">No.: {id < 10 ? `0${id}` : id}</span>
-                        <div className="flex items-center gap-1">
-                            <span className="text-blue-900">★ STRENGTH</span>
-                            <span className="text-black bg-white px-1 ml-2 min-w-[20px] text-center border border-black/10">{stats.strength || 0}</span>
+                        <span className="text-yellow-500 mx-1">★</span>
+                        <div className="flex justify-between items-center flex-1">
+                            <span className="text-blue-900">STRENGTH</span>
+                            <span className="text-black ml-1">{stats.strength || 0}</span>
                         </div>
                     </div>
 
-                    {/* Row 2: Height / Weight */}
-                    <div className="grid grid-cols-2 gap-0.5">
-                        <div className="bg-yellow-300/60 p-0.5 flex justify-between items-center">
-                            <span className="text-[6px] font-black text-blue-900">HEIGHT</span>
-                            <span className="text-[7px] font-black text-black">{stats.height_ft || 0}' ★</span>
+                    {/* Row 2: Height and Weight */}
+                    <div className="grid grid-cols-[1fr_auto_1.2fr] items-center text-[7px] font-black bg-yellow-300/60 px-1 py-0.5 border-b border-blue-400/30">
+                        <div className="flex justify-between items-center">
+                            <span className="text-blue-900">HEIGHT</span>
+                            <span className="text-black">{stats.height_ft || 0}'</span>
                         </div>
-                        <div className="bg-yellow-300/60 p-0.5 flex justify-between items-center">
-                            <span className="text-[6px] font-black text-blue-900">WEIGHT</span>
-                            <span className="text-[7px] font-black text-black">{stats.weight_kg || 0} Kg</span>
-                        </div>
-                    </div>
-
-                    {/* Row 3: IQ / Speed */}
-                    <div className="grid grid-cols-2 gap-0.5">
-                        <div className="bg-orange-300/60 p-0.5 flex justify-between items-center">
-                            <span className="text-[6px] font-black text-blue-900 leading-none">INT'ENCE: IQ</span>
-                            <span className="text-[7px] font-black text-black">{stats.intelligence_iq || 0}</span>
-                        </div>
-                        <div className="bg-orange-300/60 p-0.5 flex justify-between items-center">
-                            <span className="text-[6px] font-black text-blue-900">SPEED</span>
-                            <span className="text-[7px] font-black text-black">{stats.speed_hp || 0} HP</span>
+                        <span className="text-yellow-500 mx-1">★</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-blue-900 text-[6px]">WEIGHT</span>
+                            <span className="text-black">{stats.weight_kg || 0} Kg</span>
                         </div>
                     </div>
 
-                    {/* Row 4: Gadgets / Power */}
-                    <div className="grid grid-cols-2 gap-0.5">
-                        <div className="bg-green-300/60 p-0.5 flex justify-between items-center">
-                            <span className="text-[6px] font-black text-blue-900">GADGETS</span>
-                            <span className="text-[7px] font-black text-black">{stats.gadgets || 0}</span>
+                    {/* Row 3: IQ and Speed */}
+                    <div className="grid grid-cols-[1fr_auto_1.2fr] items-center text-[7px] font-black bg-orange-300/60 px-1 py-0.5 border-b border-blue-400/30">
+                        <div className="flex justify-between items-center">
+                            <span className="text-blue-900 text-[6px] leading-none">INT'ENCE: IQ</span>
+                            <span className="text-black ml-1">{stats.intelligence_iq || 0}</span>
                         </div>
-                        <div className="bg-green-300/60 p-0.5 flex justify-between items-center">
-                            <span className="text-[6px] font-black text-blue-900">POWER</span>
-                            <span className="text-[7px] font-black text-black">{stats.power || 0}</span>
+                        <span className="text-yellow-500 mx-1">★</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-blue-900">SPEED</span>
+                            <span className="text-black">{stats.speed_hp || 0} HP</span>
+                        </div>
+                    </div>
+
+                    {/* Row 4: Gadgets and Power */}
+                    <div className="grid grid-cols-[1fr_auto_1.2fr] items-center text-[7px] font-black bg-green-300/60 px-1 py-0.5">
+                        <div className="flex justify-between items-center">
+                            <span className="text-blue-900">GADGETS</span>
+                            <span className="text-black ml-1">{stats.gadgets || 0}</span>
+                        </div>
+                        <span className="text-yellow-500 mx-1">★</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-blue-900">POWER</span>
+                            <span className="text-black">{stats.power || 0}</span>
                         </div>
                     </div>
                 </div>
