@@ -137,7 +137,7 @@ function App() {
         // This is handled by the lobby view below
     }
 
-    if (!session) return <Auth />;
+    // if (!session) return <Auth />;
 
     return (
         <div className="flex h-screen bg-[#050510] text-white overflow-hidden font-['Outfit']">
