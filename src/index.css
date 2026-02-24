@@ -11,10 +11,17 @@
         background: #050510;
         color: white;
         overflow: hidden;
-        font-family: 'Outfit', sans-serif;
+        font-family: 'Prompt', 'Outfit', sans-serif;
+        font-weight: 200;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
+}
+
+.prompt-extralight {
+    font-family: "Prompt", sans-serif;
+    font-weight: 200;
+    font-style: normal;
 }
 
 @layer components {
