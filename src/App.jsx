@@ -140,14 +140,18 @@ function App() {
     };
 
     const handleQuit = () => {
+        // Capture roomId before resetting state
+        const currentRoomId = roomId || (gameState && gameState.roomId);
+
         setIsJoined(false);
         setGameState(null);
         setRoomId('');
         setLobbyMode('choice');
         setActiveTab('decks');
+
         // If in a match, notify server
-        if (gameState && gameState.roomId) {
-            socket.emit('forfeitMatch', { roomId: gameState.roomId, playerName });
+        if (currentRoomId) {
+            socket.emit('forfeitMatch', { roomId: currentRoomId, playerName });
         }
     };
 

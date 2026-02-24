@@ -12,11 +12,25 @@ const LeaderboardTab = () => {
             const { data, error } = await supabase
                 .from('leaderboard')
                 .select('player_name, score, created_at')
-                .order('score', { ascending: false })
-                .limit(20);
+                .order('created_at', { ascending: false });
 
             if (!error && data) {
-                setGlobalScores(data);
+                // Aggregate scores locally
+                const aggregated = data.reduce((acc, curr) => {
+                    if (!acc[curr.player_name]) {
+                        acc[curr.player_name] = {
+                            player_name: curr.player_name,
+                            score: 0,
+                            last_active: curr.created_at
+                        };
+                    }
+                    acc[curr.player_name].score += curr.score;
+                    return acc;
+                }, {});
+
+                // Convert to array and sort
+                const sorted = Object.values(aggregated).sort((a, b) => b.score - a.score);
+                setGlobalScores(sorted.slice(0, 20));
             }
             setLoading(false);
         };

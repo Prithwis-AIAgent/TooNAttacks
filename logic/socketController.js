@@ -148,30 +148,35 @@ export default (io) => {
         });
 
         socket.on('forfeitMatch', ({ roomId, playerName }) => {
+            console.log(`Forfeit request from ${playerName} in room ${roomId}`);
             const game = activeGames[roomId];
-            if (game && game.status === 'started') {
+            if (game && (game.status === 'started' || game.status === 'lobby')) {
                 game.status = 'finished';
 
+                console.log(`Terminating game in room ${roomId} due to forfeit.`);
+
                 // Award points to other players
-                const others = game.engine.players.filter(p => p.name !== playerName);
+                const others = game.engine ? game.engine.players.filter(p => p.name !== playerName) : [];
                 others.forEach(p => {
                     p.points += 10; // Award 10 points for a forfeit win
                     game.engine.updateLeaderboard(p.name, 10);
                 });
 
-                const finalScores = game.engine.players.map(p => ({
+                const finalScores = game.engine ? game.engine.players.map(p => ({
                     name: p.name,
                     points: p.points
-                }));
+                })) : [];
 
                 io.to(roomId).emit('gameOver', {
                     reason: `${playerName} forfeited`,
-                    leaderboard: game.engine.getLeaderboard(),
+                    leaderboard: game.engine ? game.engine.getLeaderboard() : [],
                     finalScores
                 });
 
                 // Persist results
-                saveMatchResults(finalScores);
+                if (finalScores.length > 0) {
+                    saveMatchResults(finalScores);
+                }
             }
         });
 
