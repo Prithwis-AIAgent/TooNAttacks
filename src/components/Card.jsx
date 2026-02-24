@@ -61,7 +61,7 @@ const Card = ({ card, isFaceUp = true, onStatClick, disabled, size = 'md' }) => 
                     <img
                         src={`/doraemon_cards/${id}.jpg`}
                         alt={name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain bg-gray-50"
                         onError={(e) => {
                             if (!e.target.src.endsWith('.png')) {
                                 e.target.src = `/doraemon_cards/${id}.png`;
@@ -134,8 +134,6 @@ const Card = ({ card, isFaceUp = true, onStatClick, disabled, size = 'md' }) => 
                 </div>
             </div>
         </motion.div>
-            </div >
-        </motion.div >
     );
 };
 
