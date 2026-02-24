@@ -14,13 +14,22 @@ const io = new Server(server, {
 });
 
 const __dirname = path.resolve();
+const distPath = path.join(__dirname, 'dist');
+const indexPath = path.join(distPath, 'index.html');
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(distPath));
 
 // Catch-all route for React SPA
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    res.sendFile(indexPath, (err) => {
+        if (err) {
+            console.error("BUILD ERROR: dist/index.html not found.");
+            console.error("Make sure to run 'npm run build' before starting the server.");
+            console.error("Path attempted:", indexPath);
+            res.status(500).send("Server Error: Build files missing. Please run build step on deployment.");
+        }
+    });
 });
 
 // Initialize game socket logic

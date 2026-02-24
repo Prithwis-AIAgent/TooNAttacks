@@ -5,7 +5,6 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DecksTab from './components/DecksTab';
 import SettingsTab from './components/SettingsTab';
-import Auth from './components/Auth';
 import { supabase } from './lib/supabase';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
@@ -137,7 +136,6 @@ function App() {
         // This is handled by the lobby view below
     }
 
-    // if (!session) return <Auth />;
 
     return (
         <div className="flex h-screen bg-[#050510] text-white overflow-hidden font-['Outfit']">
